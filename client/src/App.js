@@ -142,34 +142,35 @@ class App extends Component {
           ['Salesforce','CRM']
         ];
         randStock = stocks[Math.floor(Math.random()*stocks.length)];
-        console.log(randStock);
         fetch('/getstockdata/?stock=' + randStock[1], {
           method: 'get'
         }).then(function(res) {
           return res.json();
         }).then(function(response) {
           data = response.dataset_data.data.slice(0,100);
-          console.log(response);
           callback();
         });
       },
       (callback) => {
-        currentData = data.slice(99);
         this.setState({
           data:data,
-          currentData: currentData,
           randStock:randStock,
         });
+        callback();
       }
     ]);
   }
 
   handleStart() {
-
+    this.plotTimer();
   }
 
   componentDidUpdate() {
-    this.plotTimer();
+    var currentData = this.state.currentData;
+    if (currentData.length !== 0) {
+      console.log(currentData.length);
+      this.plotTimer();
+    }
   }
 
   plotTimer() {
@@ -185,14 +186,12 @@ class App extends Component {
 
   render() {
     var svgJSX = this.state.svgJSX;
-    if (svgJSX.length !== 0) {
-      return (
-        <div>
-          {svgJSX}
-          <button style={{'display':'block', 'margin': '0 auto'}}>Start</button>
-        </div>
-      );
-    }
+    return (
+      <div>
+        <button onClick={() => {this.handleStart()}} style={{'display':'block', 'margin': '0 auto'}}>Start</button>
+        {svgJSX}
+      </div>
+    );
     return <div></div>;
   }
 }
