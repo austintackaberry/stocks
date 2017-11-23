@@ -158,6 +158,7 @@ class App extends Component {
     var data = [];
     var randStock;
     var stocks = this.state.stocks.slice();
+    var userStockData = this.state.userStockData;
     async.series([
       (callback) => {
         randStock = stocks[Math.floor(Math.random()*stocks.length)];
@@ -172,11 +173,13 @@ class App extends Component {
         });
       },
       (callback) => {
+        userStockData.finalStockValue = parseFloat(data[0][11] * userStockData.currentStocks).toFixed(2);
         this.setState({
           data:data,
           randStock:randStock,
           currentData: [],
-          gettingNewStock: false
+          gettingNewStock: false,
+          userStockData: userStockData
         });
         this.plotTimer();
         callback();
@@ -192,54 +195,74 @@ class App extends Component {
   handleBuySell = (event) => {
     console.log(event.key);
     var userStockData = this.state.userStockData;
-    if (event.key == 'ArrowUp' && userStockData.currentSells > 0) {
+    if (event.key == 'ArrowDown' && userStockData.currentSells > 0) {
       this.setState({sold:true});
     }
-    if (event.key == 'ArrowDown' && userStockData.currentBuys > 0) {
+    if (event.key == 'ArrowUp' && userStockData.currentBuys > 0) {
       this.setState({bought:true});
     }
   }
 
   plotTimer() {
     var data = this.state.data.slice();
-    var currentData = this.state.currentData;
-    currentData = data.slice(data.length-1-currentData.length);
-    var userStockData = this.state.userStockData;
-    var lastStockPrice = currentData[0][11]
-    if (currentData.length === 1) {
-      userStockData.initialStockValue = (lastStockPrice * userStockData.currentStocks).toFixed(2);
-    }
-    else if (this.state.sold) {
-      userStockData.currentSells--;
-      userStockData.currentStocks--;
-      userStockData.bank = (userStockData.bank + lastStockPrice).toFixed(2);
-      this.setState({sold:false});
-    }
-    else if (this.state.bought) {
-      userStockData.currentBuys--;
-      userStockData.currentStocks++;
-      userStockData.bank = (userStockData.bank - lastStockPrice).toFixed(2);
-      this.setState({bought:false});
-    }
-    userStockData.currentStockValue = (lastStockPrice * userStockData.currentStocks).toFixed(2);
-    this.setState({
-      userStockData:userStockData
-    });
-    setTimeout(function () {
-      if (currentData.length !== data.length) {
-        this.plotGraph(data, currentData);
+    var currentData = this.state.currentData.slice();
+    if (data.length !== currentData.length) {
+      currentData = data.slice(data.length-1-currentData.length);
+      var userStockData = this.state.userStockData;
+      var lastStockPrice = currentData[0][11];
+
+      if (this.state.sold) {
+        userStockData.currentSells--;
+        userStockData.currentStocks--;
+        userStockData.bank = parseFloat(userStockData.bank + lastStockPrice).toFixed(2);
+        userStockData.currentStockValue -= lastStockPrice;
+        this.setState({sold:false});
       }
-    }.bind(this), 60);
+      else if (this.state.bought) {
+        userStockData.currentBuys--;
+        userStockData.currentStocks++;
+        userStockData.bank = (userStockData.bank - lastStockPrice).toFixed(2);
+        userStockData.currentStockValue += lastStockPrice;
+        this.setState({bought:false});
+      }
+      userStockData.currentStockValue = (lastStockPrice * userStockData.currentStocks).toFixed(2);
+      this.setState({
+        userStockData:userStockData
+      });
+      setTimeout(function () {
+        this.plotGraph(data, currentData);
+      }.bind(this), 60);
+    }
   }
 
   render() {
     var svgJSX = this.state.svgJSX.slice();
     var userStockJSX = [];
     var userStockData = this.state.userStockData;
+    var bankStr;
+    if (userStockData.bank < 0) {
+      bankStr = '-$' + (-1*userStockData.bank);
+    }
+    else {
+      bankStr = '$' + userStockData.bank;
+    }
+    var buys = 'buys';
+    if (userStockData.currentBuys === 1) {
+      buys = 'buy';
+    }
+    var sells = 'sells';
+    if (userStockData.currentSells === 1) {
+      sells = 'sell';
+    }
     if (svgJSX.length > 0) {
-      userStockJSX.push(<p>User has {userStockData.currentStocks} stocks worth a total of ${userStockData.currentStockValue}</p>);
-      userStockJSX.push(<p>User has ${userStockData.bank} cash in the bank</p>);
-      userStockJSX.push(<p>User has {userStockData.currentBuys} buys and {userStockData.currentSells} sells left</p>);
+      userStockJSX.push(<p>You have {userStockData.currentStocks} stocks worth a total of ${userStockData.currentStockValue}</p>);
+      userStockJSX.push(<p>You have {bankStr} cash in the bank</p>);
+      userStockJSX.push(<p>You have {userStockData.currentBuys} buys and {userStockData.currentSells} sells left</p>);
+    }
+    if (this.state.currentData.length > 0 && this.state.data.length === this.state.currentData.length) {
+      userStockJSX.push(<br />);
+      userStockJSX.push(<p>You have stocks plus cash totaling ${(parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2)}</p>);
+      userStockJSX.push(<p>If you did not make any transactions, you would have stocks worth ${userStockData.finalStockValue}</p>);
     }
     return (
       <div>
