@@ -11,17 +11,54 @@ class App extends Component {
       svgJSX:[],
       data: [],
       currentData: [],
-      randStock: ''
+      randStock: '',
+      stocks: [
+        ['Apple Inc.','AAPL'],
+        ['Pandora','P'],
+        ['Microsoft','MSFT'],
+        ['Alphabet','GOOGL'],
+        ['IBM','IBM'],
+        ['Intel','INTC'],
+        ['Cisco Systems','CSCO'],
+        ['Oracle','ORCL'],
+        ['Facebook','FB'],
+        ['Zynga','ZNGA'],
+        ['HP','HPQ'],
+        ['Walmart','WMT'],
+        ['Tesla','TSLA'],
+        ['Amazon','AMZN'],
+        ['ExxonMobil','XOM'],
+        ['Goldman Sachs','GS'],
+        ['JPMorgan Chase','JPM'],
+        ['Twitter', 'TWTR'],
+        ['Salesforce','CRM']
+      ],
+      gettingNewStock: false,
+      userStockJSX: [],
+      userStockData: {
+        currentStocks: 3,
+        currentBuys: 3,
+        currentSells: 3,
+        bank: 0
+      },
+      sold: false,
+      bought: false
     }
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
     this.handleStart = this.handleStart.bind(this);
+    this.handleBuySell = this.handleBuySell.bind(this);
+    this.getNewStock = this.getNewStock.bind(this);
+  }
+
+  componentWillMount() {
+    document.addEventListener("keydown", this.handleBuySell, false);
   }
 
   plotGraph(data, currentData) {
     var margin = {top: 50, right: 20, bottom: 20, left: 20};
     var padding = {top: 20, right: 20, bottom: 20, left: 20};
-    var outerWidth = 700;
+    var outerWidth = 800;
     var outerHeight = 500;
     var innerWidth = outerWidth - margin.left - margin.right;
     var innerHeight = outerHeight - margin.top - margin.bottom;
@@ -31,10 +68,10 @@ class App extends Component {
     var selectX = datum => (new Date(datum[0]).setHours(0,0,0,0));
     var selectY = datum => datum[11];
     var xScale = d3.scaleTime()
-                   .domain(d3.extent(data, selectX))
+                   .domain(d3.extent(currentData, selectX))
                    .range([margin.left+padding.left, margin.left+padding.left+width]);
     var yScale = d3.scaleLinear()
-                   .domain(d3.extent(data, selectY))
+                   .domain(d3.extent(currentData, selectY))
                    .range([margin.top+padding.top+height, margin.top+padding.top]);
     const xAxis = d3.axisBottom()
                     .scale(xScale)
@@ -111,43 +148,26 @@ class App extends Component {
         currentData:currentData
       }
     );
+    var gettingNewStock = this.state.gettingNewStock;
+    if (currentData.length !== 0 && !gettingNewStock) {
+      this.plotTimer();
+    }
   }
 
-  componentWillMount() {
+  getNewStock() {
     var data = [];
-    var currentData = [];
     var randStock;
+    var stocks = this.state.stocks.slice();
     async.series([
       (callback) => {
-        var stocks = [
-          ['Apple Inc.','AAPL'],
-          ['Pandora','P'],
-          ['Microsoft','MSFT'],
-          ['Alphabet','GOOGL'],
-          ['IBM','IBM'],
-          ['Intel','INTC'],
-          ['Cisco Systems','CSCO'],
-          ['Oracle','ORCL'],
-          ['Facebook','FB'],
-          ['Zynga','ZNGA'],
-          ['SAP','SAP'],
-          ['HP','HPQ'],
-          ['Walmart','WMT'],
-          ['Tesla','TSLA'],
-          ['Amazon','AMZN'],
-          ['ExxonMobil','XOM'],
-          ['Goldman Sachs','GS'],
-          ['JPMorgan Chase','JPM'],
-          ['Blue Apron','APRN'],
-          ['Salesforce','CRM']
-        ];
         randStock = stocks[Math.floor(Math.random()*stocks.length)];
+        console.log(randStock);
         fetch('/getstockdata/?stock=' + randStock[1], {
           method: 'get'
         }).then(function(res) {
           return res.json();
         }).then(function(response) {
-          data = response.dataset_data.data.slice(0,100);
+          data = response.dataset_data.data.slice(0,300);
           callback();
         });
       },
@@ -155,44 +175,79 @@ class App extends Component {
         this.setState({
           data:data,
           randStock:randStock,
+          currentData: [],
+          gettingNewStock: false
         });
+        this.plotTimer();
         callback();
       }
     ]);
   }
 
   handleStart() {
-    this.plotTimer();
+    this.setState({gettingNewStock: true});
+    this.getNewStock();
   }
 
-  componentDidUpdate() {
-    var currentData = this.state.currentData;
-    if (currentData.length !== 0) {
-      console.log(currentData.length);
-      this.plotTimer();
+  handleBuySell = (event) => {
+    console.log(event.key);
+    var userStockData = this.state.userStockData;
+    if (event.key == 'ArrowUp' && userStockData.currentSells > 0) {
+      this.setState({sold:true});
+    }
+    if (event.key == 'ArrowDown' && userStockData.currentBuys > 0) {
+      this.setState({bought:true});
     }
   }
 
   plotTimer() {
+    var data = this.state.data.slice();
+    var currentData = this.state.currentData;
+    currentData = data.slice(data.length-1-currentData.length);
+    var userStockData = this.state.userStockData;
+    var lastStockPrice = currentData[0][11]
+    if (currentData.length === 1) {
+      userStockData.initialStockValue = (lastStockPrice * userStockData.currentStocks).toFixed(2);
+    }
+    else if (this.state.sold) {
+      userStockData.currentSells--;
+      userStockData.currentStocks--;
+      userStockData.bank = (userStockData.bank + lastStockPrice).toFixed(2);
+      this.setState({sold:false});
+    }
+    else if (this.state.bought) {
+      userStockData.currentBuys--;
+      userStockData.currentStocks++;
+      userStockData.bank = (userStockData.bank - lastStockPrice).toFixed(2);
+      this.setState({bought:false});
+    }
+    userStockData.currentStockValue = (lastStockPrice * userStockData.currentStocks).toFixed(2);
+    this.setState({
+      userStockData:userStockData
+    });
     setTimeout(function () {
-      var currentData = this.state.currentData;
-      var data = this.state.data;
       if (currentData.length !== data.length) {
-        currentData = data.slice(99-currentData.length);
         this.plotGraph(data, currentData);
       }
     }.bind(this), 60);
   }
 
   render() {
-    var svgJSX = this.state.svgJSX;
+    var svgJSX = this.state.svgJSX.slice();
+    var userStockJSX = [];
+    var userStockData = this.state.userStockData;
+    if (svgJSX.length > 0) {
+      userStockJSX.push(<p>User has {userStockData.currentStocks} stocks worth a total of ${userStockData.currentStockValue}</p>);
+      userStockJSX.push(<p>User has ${userStockData.bank} cash in the bank</p>);
+      userStockJSX.push(<p>User has {userStockData.currentBuys} buys and {userStockData.currentSells} sells left</p>);
+    }
     return (
       <div>
-        <button onClick={() => {this.handleStart()}} style={{'display':'block', 'margin': '0 auto'}}>Start</button>
+        <button onClick={() => {this.handleStart()}} style={{'display':'block', 'margin': '0 auto', 'margin-top': '20px'}}>Start</button>
         {svgJSX}
+        {userStockJSX}
       </div>
     );
-    return <div></div>;
   }
 }
 
