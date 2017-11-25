@@ -10,8 +10,11 @@ class App extends Component {
     this.state = {
       svgJSX:[],
       data: [],
-      currentLineData: [],
-      currentScatterData: [],
+      currentData: [],
+      currentUserScatterData: [],
+      currentUserScatterColor: [],
+      currentMLScatterData: [],
+      currentMLScatterColor: [],
       randStock: '',
       stocks: [
         ['Apple Inc.','AAPL'],
@@ -60,22 +63,179 @@ class App extends Component {
         initialSells: 3,
         bank: 0
       },
-      sold: false,
-      bought: false,
-      dataColorArr: []
+      mlStockData: {
+        currentStocks: 3,
+        currentBuys: 3,
+        currentSells: 3,
+        initialStocks: 3,
+        initialBuys: 3,
+        initialSells: 3,
+        bank: 0
+      },
+      userBought: false,
+      userSold: false
     }
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
     this.handleStart = this.handleStart.bind(this);
     this.handleBuySell = this.handleBuySell.bind(this);
     this.getNewStock = this.getNewStock.bind(this);
+    this.checkMLBuySell = this.checkMLBuySell.bind(this);
   }
 
   componentWillMount() {
     document.addEventListener("keydown", this.handleBuySell, false);
   }
 
-  plotGraph(data, currentLineData, currentScatterData, dataColorArr) {
+  getNewStock() {
+    var data = [];
+    var randStock;
+    var stocks = this.state.stocks.slice();
+    var userStockData = this.state.userStockData;
+    var mlStockData = this.state.mlStockData;
+    async.series([
+      (callback) => {
+        randStock = stocks[Math.floor(Math.random()*stocks.length)];
+        console.log(randStock);
+        fetch('/getstockdata/?stock=' + randStock[1], {
+          method: 'get'
+        }).then(function(res) {
+          return res.json();
+        }).then(function(response) {
+          data = JSON.parse(response).data;
+          callback();
+        });
+      },
+      (callback) => {
+        userStockData.finalStockValue = parseFloat(data[data.length-1].EOD * userStockData.currentStocks);
+        this.setState({
+          data:data,
+          randStock:randStock,
+          currentData: [],
+          currentUserScatterData: [],
+          currentUserScatterColor: [],
+          currentMLScatterData: [],
+          currentMLScatterColor: [],
+          gettingNewStock: false,
+          userStockData: userStockData,
+          mlStockData: mlStockData
+        });
+        this.plotTimer();
+        callback();
+      }
+    ]);
+  }
+
+  handleStart() {
+    var userStockData = this.state.userStockData;
+    userStockData.currentStocks = userStockData.initialStocks;
+    userStockData.currentBuys = userStockData.initialBuys;
+    userStockData.currentSells = userStockData.initialSells;
+    userStockData.bank = 0;
+    var mlStockData = this.state.mlStockData;
+    mlStockData.currentStocks = mlStockData.initialStocks;
+    mlStockData.currentBuys = mlStockData.initialBuys;
+    mlStockData.currentSells = mlStockData.initialSells;
+    mlStockData.bank = 0;
+    this.setState({
+      gettingNewStock: true,
+      userStockData: userStockData,
+      mlStockData: mlStockData
+    });
+    this.getNewStock();
+  }
+
+  handleBuySell = (event) => {
+    console.log(event.key);
+    var userStockData = this.state.userStockData;
+    if (event.key == 'ArrowDown' && userStockData.currentSells > 0) {
+      this.setState({userSold:true});
+    }
+    if (event.key == 'ArrowUp' && userStockData.currentBuys > 0) {
+      this.setState({userBought:true});
+    }
+  }
+
+  checkMLBuySell(currentData) {
+    var lastElem = currentData[currentData.length-1];
+    var dataLength = this.state.data.length;
+    var currentDataLength = currentData.length;
+    var multiplier = (dataLength - currentDataLength) / dataLength * 1.0;
+    var mlStockData = this.state.mlStockData;
+    var pctDiff = (lastElem.prediction - lastElem.EOD) / lastElem.EOD * 100.0;
+    if (currentDataLength % 5 === 0) {
+      if (pctDiff > 10 * multiplier && mlStockData.currentBuys > 0) {
+        return 'buy';
+      }
+      if (pctDiff < -10 * multiplier && mlStockData.currentSells > 0) {
+        return 'sell';
+      }
+    }
+    return false;
+  }
+
+  plotTimer() {
+    var data = this.state.data.slice();
+    var currentData = this.state.currentData.slice();
+    var currentUserScatterData = this.state.currentUserScatterData.slice();
+    var currentUserScatterColor = this.state.currentUserScatterColor.slice();
+    var currentMLScatterData = this.state.currentMLScatterData.slice();
+    var currentMLScatterColor = this.state.currentMLScatterColor.slice();
+    if (data.length !== currentData.length) {
+      currentData = data.slice(0,currentData.length+1);
+      var userStockData = this.state.userStockData;
+      var mlStockData = this.state.mlStockData;
+      var lastStockPrice = parseFloat(currentData[currentData.length-1].EOD);
+      var mlShouldBuySell = this.checkMLBuySell(currentData);
+      if (mlShouldBuySell) {
+        if (mlShouldBuySell === 'buy') {
+          currentMLScatterColor.push("purple");
+          currentMLScatterData.push(currentData[currentData.length-1]);
+          mlStockData.currentBuys--;
+          mlStockData.currentStocks++;
+          mlStockData.bank = (parseFloat(mlStockData.bank) - lastStockPrice).toFixed(2);
+          mlStockData.currentStockValue += lastStockPrice;
+        }
+        else if (mlShouldBuySell === 'sell') {
+          currentMLScatterColor.push("green");
+          currentMLScatterData.push(currentData[currentData.length-1]);
+          mlStockData.currentSells--;
+          mlStockData.currentStocks--;
+          mlStockData.bank = (parseFloat(mlStockData.bank) + lastStockPrice).toFixed(2);
+          mlStockData.currentStockValue -= lastStockPrice;
+        }
+      }
+      if (this.state.userSold) {
+        currentUserScatterColor.push("red");
+        currentUserScatterData.push(currentData[currentData.length-1]);
+        userStockData.currentSells--;
+        userStockData.currentStocks--;
+        userStockData.bank = (parseFloat(userStockData.bank) + lastStockPrice).toFixed(2);
+        userStockData.currentStockValue -= lastStockPrice;
+        this.setState({userSold:false});
+      }
+      else if (this.state.userBought) {
+        currentUserScatterColor.push("blue");
+        currentUserScatterData.push(currentData[currentData.length-1]);
+        userStockData.currentBuys--;
+        userStockData.currentStocks++;
+        userStockData.bank = (parseFloat(userStockData.bank) - lastStockPrice).toFixed(2);
+        userStockData.currentStockValue += lastStockPrice;
+        this.setState({userBought:false});
+      }
+      userStockData.currentStockValue = (lastStockPrice * userStockData.currentStocks).toFixed(2);
+      mlStockData.currentStockValue = (lastStockPrice * mlStockData.currentStocks).toFixed(2);
+      this.setState({
+        userStockData:userStockData,
+        mlStockData:mlStockData
+      });
+      setTimeout(function () {
+        this.plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor);
+      }.bind(this), 75);
+    }
+  }
+
+  plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor) {
     var margin = {top: 50, right: 20, bottom: 20, left: 20};
     var padding = {top: 25, right: 25, bottom: 25, left: 25};
     var outerWidth = window.innerWidth*0.8;
@@ -86,12 +246,12 @@ class App extends Component {
     var height = innerHeight - padding.top - padding.bottom;
 
     var selectX = datum => (new Date(datum['Date']).setHours(0,0,0,0));
-    var selectY = datum => datum['Adj. Close'];
+    var selectY = datum => datum.EOD;
     var xScale = d3.scaleTime()
-                   .domain(d3.extent(currentLineData, selectX))
+                   .domain(d3.extent(currentData, selectX))
                    .range([margin.left+padding.left, margin.left+padding.left+width]);
     var yScale = d3.scaleLinear()
-                   .domain(d3.extent(currentLineData, selectY))
+                   .domain(d3.extent(currentData, selectY))
                    .range([margin.top+padding.top+height, margin.top+padding.top]);
     const xAxis = d3.axisBottom()
                     .scale(xScale)
@@ -104,14 +264,18 @@ class App extends Component {
     const sparkLine = d3.line()
                         .x(selectScaledX)
                         .y(selectScaledY);
-    const linePath = sparkLine(currentLineData);
-    const circlePoints = currentScatterData.map(datum => ({
+    const linePath = sparkLine(currentData);
+    const userCirclePoints = currentUserScatterData.map(datum => ({
+      x: selectScaledX(datum),
+      y: selectScaledY(datum),
+    }));
+    const mlCirclePoints = currentMLScatterData.map(datum => ({
       x: selectScaledX(datum),
       y: selectScaledY(datum),
     }));
     var randStockName = this.state.randStock[0];
     var title = [];
-    if (currentLineData.length === data.length) {
+    if (currentData.length === data.length) {
       title.push(
         <text
           x={(outerWidth/2)}
@@ -152,13 +316,24 @@ class App extends Component {
           <path d={linePath} />
         </g>
         <g className="scatter">
-          {circlePoints.map((circlePoint, index) => (
+          {userCirclePoints.map((circlePoint, index) => (
             <circle
               cx={circlePoint.x}
               cy={circlePoint.y}
               key={`${circlePoint.x},${circlePoint.y}`}
               r={6}
-              style={{"fill":dataColorArr[index]}}
+              style={{"fill":currentUserScatterColor[index]}}
+            />
+          ))}
+        </g>
+        <g className="scatter">
+          {mlCirclePoints.map((circlePoint, index) => (
+            <circle
+              cx={circlePoint.x}
+              cy={circlePoint.y}
+              key={`${circlePoint.x},${circlePoint.y}`}
+              r={6}
+              style={{"fill":currentMLScatterColor[index]}}
             />
           ))}
         </g>
@@ -169,122 +344,44 @@ class App extends Component {
       {
         svgJSX:svgJSX,
         data:data,
-        currentLineData:currentLineData,
-        currentScatterData:currentScatterData,
-        dataColorArr: dataColorArr
+        currentData:currentData,
+        currentUserScatterData:currentUserScatterData,
+        currentUserScatterColor: currentUserScatterColor,
+        currentMLScatterData:currentMLScatterData,
+        currentMLScatterColor: currentMLScatterColor,
       }
     );
     var gettingNewStock = this.state.gettingNewStock;
-    if (currentLineData.length !== 0 && !gettingNewStock) {
+    if (currentData.length !== 0 && !gettingNewStock) {
       this.plotTimer();
-    }
-  }
-
-  getNewStock() {
-    var data = [];
-    var randStock;
-    var stocks = this.state.stocks.slice();
-    var userStockData = this.state.userStockData;
-    async.series([
-      (callback) => {
-        randStock = stocks[Math.floor(Math.random()*stocks.length)];
-        console.log(randStock);
-        fetch('/getstockdata/?stock=' + randStock[1], {
-          method: 'get'
-        }).then(function(res) {
-          return res.json();
-        }).then(function(response) {
-          data = JSON.parse(response).data;
-          callback();
-        });
-      },
-      (callback) => {
-        userStockData.finalStockValue = parseFloat(data[data.length-1]['Adj. Close'] * userStockData.currentStocks).toFixed(2);
-        this.setState({
-          data:data,
-          randStock:randStock,
-          currentLineData: [],
-          currentScatterData: [],
-          dataColorArr: [],
-          gettingNewStock: false,
-          userStockData: userStockData
-        });
-        this.plotTimer();
-        callback();
-      }
-    ]);
-  }
-
-  handleStart() {
-    var userStockData = this.state.userStockData;
-    userStockData.currentStocks = userStockData.initialStocks;
-    userStockData.currentBuys = userStockData.initialBuys;
-    userStockData.currentSells = userStockData.initialSells;
-    userStockData.bank = 0;
-    this.setState({
-      gettingNewStock: true,
-      userStockData: userStockData
-    });
-    this.getNewStock();
-  }
-
-  handleBuySell = (event) => {
-    console.log(event.key);
-    var userStockData = this.state.userStockData;
-    if (event.key == 'ArrowDown' && userStockData.currentSells > 0) {
-      this.setState({sold:true});
-    }
-    if (event.key == 'ArrowUp' && userStockData.currentBuys > 0) {
-      this.setState({bought:true});
-    }
-  }
-
-  plotTimer() {
-    var data = this.state.data.slice();
-    var currentLineData = this.state.currentLineData.slice();
-    var currentScatterData = this.state.currentScatterData.slice();
-    var dataColorArr = this.state.dataColorArr.slice();
-    if (data.length !== currentLineData.length) {
-      currentLineData = data.slice(0,currentLineData.length+1);
-      var userStockData = this.state.userStockData;
-      var lastStockPrice = parseFloat(currentLineData[currentLineData.length-1]['Adj. Close']);
-
-      if (this.state.sold) {
-        dataColorArr.push("red");
-        currentScatterData.push(currentLineData[currentLineData.length-1]);
-        userStockData.currentSells--;
-        userStockData.currentStocks--;
-        userStockData.bank = (parseFloat(userStockData.bank) + lastStockPrice).toFixed(2);
-        userStockData.currentStockValue -= lastStockPrice;
-        this.setState({sold:false});
-        console.log(typeof userStockData.bank);
-      }
-      else if (this.state.bought) {
-        dataColorArr.push("blue");
-        currentScatterData.push(currentLineData[currentLineData.length-1]);
-        userStockData.currentBuys--;
-        userStockData.currentStocks++;
-        userStockData.bank = (parseFloat(userStockData.bank) - lastStockPrice).toFixed(2);
-        userStockData.currentStockValue += lastStockPrice;
-        this.setState({bought:false});
-        console.log(typeof userStockData.bank);
-      }
-      userStockData.currentStockValue = (lastStockPrice * userStockData.currentStocks).toFixed(2);
-      this.setState({
-        userStockData:userStockData
-      });
-      setTimeout(function () {
-        this.plotGraph(data, currentLineData, currentScatterData, dataColorArr);
-      }.bind(this), 60);
     }
   }
 
   render() {
     var svgJSX = this.state.svgJSX.slice();
-    var userStockJSX = [];
+    var stockDataJSX = [];
     var gettingNewStock = this.state.gettingNewStock;
     var userStockData = this.state.userStockData;
+    var mlStockData = this.state.mlStockData;
     var bankStr;
+    var podium = [
+      {
+        name: 'User',
+        stockValue: parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)
+      },
+      {
+        name: 'AI',
+        stockValue: parseFloat(mlStockData.currentStockValue) + parseFloat(mlStockData.bank)
+      },
+      {
+        name: 'Market',
+        stockValue: userStockData.finalStockValue
+      }
+    ];
+    podium.sort(function (a, b) {
+        return b.stockValue - a.stockValue;
+      }
+    );
     if (userStockData.bank < 0) {
       bankStr = '-$' + (-1*userStockData.bank);
     }
@@ -300,20 +397,21 @@ class App extends Component {
       sells = 'sell';
     }
     if (svgJSX.length > 0) {
-      userStockJSX.push(<p>You have {userStockData.currentStocks} stocks worth a total of ${userStockData.currentStockValue}</p>);
-      userStockJSX.push(<p>You have {bankStr} cash in the bank</p>);
-      userStockJSX.push(<p>You have {userStockData.currentBuys} {buys} and {userStockData.currentSells} {sells} left</p>);
+      stockDataJSX.push(<p>You have {userStockData.currentStocks} stocks worth a total of ${userStockData.currentStockValue}</p>);
+      stockDataJSX.push(<p>You have {bankStr} cash in the bank</p>);
+      stockDataJSX.push(<p>You have {userStockData.currentBuys} {buys} and {userStockData.currentSells} {sells} left</p>);
     }
-    if (this.state.currentLineData.length > 0 && this.state.data.length === this.state.currentLineData.length && !gettingNewStock) {
-      userStockJSX.push(<br />);
-      userStockJSX.push(<p>You have stocks plus cash totaling ${(parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2)}</p>);
-      userStockJSX.push(<p>If you did not make any transactions, you would have stocks worth ${userStockData.finalStockValue}</p>);
+    if (this.state.currentData.length > 0 && this.state.data.length === this.state.currentData.length && !gettingNewStock) {
+      stockDataJSX.push(<br />);
+      stockDataJSX.push(<p>1st: {podium[0].name}: ${podium[0].stockValue.toFixed(2)}</p>);
+      stockDataJSX.push(<p>2nd: {podium[1].name}: ${podium[1].stockValue.toFixed(2)}</p>);
+      stockDataJSX.push(<p>3rd: {podium[2].name}: ${podium[2].stockValue.toFixed(2)}</p>);
     }
     return (
       <div>
         <button onClick={() => {this.handleStart()}} style={{'display':'block', 'margin': '0 auto', 'margin-top': '20px'}}>Start</button>
         {svgJSX}
-        {userStockJSX}
+        {stockDataJSX}
       </div>
     );
   }

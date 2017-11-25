@@ -51,6 +51,7 @@ def getStockData():
 
     prediction = clf.predict(X_data)
     data = data[['Adj. Close']]
+    data = data.rename(columns={'Adj. Close':'EOD'})
     data['prediction'] = prediction[:]
     data = data.to_json(orient='table')
     return jsonify(data)
