@@ -85,8 +85,8 @@ class App extends Component {
     var width = innerWidth - padding.left - padding.right;
     var height = innerHeight - padding.top - padding.bottom;
 
-    var selectX = datum => (new Date(datum[0]).setHours(0,0,0,0));
-    var selectY = datum => datum[11];
+    var selectX = datum => (new Date(datum['Date']).setHours(0,0,0,0));
+    var selectY = datum => datum['Adj. Close'];
     var xScale = d3.scaleTime()
                    .domain(d3.extent(currentLineData, selectX))
                    .range([margin.left+padding.left, margin.left+padding.left+width]);
@@ -194,16 +194,12 @@ class App extends Component {
         }).then(function(res) {
           return res.json();
         }).then(function(response) {
-          var dataLength = 365;
-          var allData = response.dataset_data.data.slice();
-          var allDataLength = allData.length;
-          var firstDataElem = Math.floor(Math.random()*(allDataLength-dataLength));
-          data = allData.slice(firstDataElem,firstDataElem+dataLength);
+          data = JSON.parse(response).data;
           callback();
         });
       },
       (callback) => {
-        userStockData.finalStockValue = parseFloat(data[0][11] * userStockData.currentStocks).toFixed(2);
+        userStockData.finalStockValue = parseFloat(data[data.length-1]['Adj. Close'] * userStockData.currentStocks).toFixed(2);
         this.setState({
           data:data,
           randStock:randStock,
@@ -249,13 +245,13 @@ class App extends Component {
     var currentScatterData = this.state.currentScatterData.slice();
     var dataColorArr = this.state.dataColorArr.slice();
     if (data.length !== currentLineData.length) {
-      currentLineData = data.slice(data.length-1-currentLineData.length);
+      currentLineData = data.slice(0,currentLineData.length+1);
       var userStockData = this.state.userStockData;
-      var lastStockPrice = parseFloat(currentLineData[0][11]);
+      var lastStockPrice = parseFloat(currentLineData[currentLineData.length-1]['Adj. Close']);
 
       if (this.state.sold) {
-        dataColorArr.unshift("red");
-        currentScatterData.unshift(currentLineData[0]);
+        dataColorArr.push("red");
+        currentScatterData.push(currentLineData[currentLineData.length-1]);
         userStockData.currentSells--;
         userStockData.currentStocks--;
         userStockData.bank = (parseFloat(userStockData.bank) + lastStockPrice).toFixed(2);
@@ -264,8 +260,8 @@ class App extends Component {
         console.log(typeof userStockData.bank);
       }
       else if (this.state.bought) {
-        dataColorArr.unshift("blue");
-        currentScatterData.unshift(currentLineData[0]);
+        dataColorArr.push("blue");
+        currentScatterData.push(currentLineData[currentLineData.length-1]);
         userStockData.currentBuys--;
         userStockData.currentStocks++;
         userStockData.bank = (parseFloat(userStockData.bank) - lastStockPrice).toFixed(2);
