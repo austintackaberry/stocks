@@ -7,9 +7,55 @@ path {
   stroke: #000;
 }
 
-svg {
-  display: block;
+.content-container {
+  display: table;
+  width: 100%;
+}
+
+.leaderboard {
+  display: table-cell;
+  vertical-align: top;
+  padding-left: 10px;
+  padding-right: 20px;
+}
+
+.leader-content p {
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.leader-content {
   margin: 0 auto;
+  display: inline-block;
+  float: none;
+}
+
+.leader-content-container {
+  width: 100%;
+  text-align: center;
+}
+
+.podium-container {
+  width: 100%;
+  text-align: center;
+}
+
+.podium {
+  margin: 0 auto;
+  display: inline-block;
+  float: none;
+}
+
+.podium p {
+  text-align: left;
+}
+
+h3 {
+  text-align: center;
+}
+
+svg {
+  display: table-cell;
 }
 
 p {
@@ -19,4 +65,28 @@ p {
 
 body {
   background-color: #f6f7f9;
+}
+
+.btn {
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 20px;
+  background: #2790d6;
+  padding: 10px 20px 10px 20px;
+  border-style: none;
+  display: block;
+  margin: 0 auto;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.btn:focus{
+  outline: none;
+  border: 1px solid black;
+  padding: 9px 19px 9px 19px;
+}
+
+.btn:hover {
+  background: #3cb0fd;
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
 }

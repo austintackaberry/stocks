@@ -73,7 +73,38 @@ class App extends Component {
         bank: 0
       },
       userBought: false,
-      userSold: false
+      userSold: false,
+      records: {
+        gamesPlayed: 0,
+        leaderboard: [
+          {
+            name: 'User',
+            score: 0
+          },
+          {
+            name: 'AI',
+            score: 0
+          },
+          {
+            name: 'Market',
+            score: 0
+          }
+        ]
+      },
+      podium: [
+        {
+          name: 'User',
+          stockValue: 0
+        },
+        {
+          name: 'AI',
+          stockValue: 0
+        },
+        {
+          name: 'Market',
+          stockValue: 0
+        }
+      ]
     }
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
@@ -81,6 +112,7 @@ class App extends Component {
     this.handleBuySell = this.handleBuySell.bind(this);
     this.getNewStock = this.getNewStock.bind(this);
     this.checkMLBuySell = this.checkMLBuySell.bind(this);
+    this.calcScore = this.calcScore.bind(this);
   }
 
   componentWillMount() {
@@ -160,10 +192,13 @@ class App extends Component {
     var lastElem = currentData[currentData.length-1];
     var dataLength = this.state.data.length;
     var currentDataLength = currentData.length;
-    var multiplier = (dataLength - currentDataLength) / dataLength * 1.0;
+    var multiplier = (dataLength*0.88 - currentDataLength) / (dataLength*0.88) * 1.0;
+    if (multiplier < 0.01) {
+      multiplier = 0.01;
+    }
     var mlStockData = this.state.mlStockData;
     var pctDiff = (lastElem.prediction - lastElem.EOD) / lastElem.EOD * 100.0;
-    if (currentDataLength % 5 === 0) {
+    if (currentDataLength % 1 === 0) {
       if (pctDiff > 10 * multiplier && mlStockData.currentBuys > 0) {
         return 'buy';
       }
@@ -231,14 +266,83 @@ class App extends Component {
       });
       setTimeout(function () {
         this.plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor);
-      }.bind(this), 75);
+      }.bind(this), 60);
+    }
+    else {
+      this.calcScore();
     }
   }
 
+  calcScore() {
+    var userStockData = this.state.userStockData;
+    var mlStockData = this.state.mlStockData;
+    var podium = [
+      {
+        name: 'User',
+        stockValue: parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)
+      },
+      {
+        name: 'AI',
+        stockValue: parseFloat(mlStockData.currentStockValue) + parseFloat(mlStockData.bank)
+      },
+      {
+        name: 'Market',
+        stockValue: userStockData.finalStockValue
+      }
+    ];
+    podium.sort(function (a, b) {
+        return b.stockValue - a.stockValue;
+      }
+    );
+    var lastScores = {};
+    lastScores[podium[0].name] = 2;
+    lastScores[podium[1].name] = 1;
+    lastScores[podium[2].name] = 0;
+
+    var records = this.state.records;
+    records.gamesPlayed++;
+
+    for (let i = 0; i < records.leaderboard.length; i++) {
+      if (records.leaderboard[i].name === 'User') {
+        records.leaderboard[i].score += lastScores['User']
+      }
+      if (records.leaderboard[i].name === 'AI') {
+        records.leaderboard[i].score += lastScores['AI']
+      }
+      if (records.leaderboard[i].name === 'Market') {
+        records.leaderboard[i].score += lastScores['Market']
+      }
+    }
+    records.leaderboard.sort(function (a, b) {
+        return b.score - a.score;
+      }
+    );
+
+    this.setState({
+      podium:podium,
+      records:records
+    })
+  }
+
   plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor) {
-    var margin = {top: 50, right: 20, bottom: 20, left: 20};
+    var records = this.state.records;
+    var margin;
+    var outerWidth;
+    var svgStyle = {};
+    if (records.gamesPlayed > 0) {
+      margin = {top: 50, right: 0, bottom: 20, left: 40};
+      outerWidth = (window.innerWidth - document.getElementsByClassName('leaderboard')[0].offsetWidth);
+    }
+    else if (records.gamesPlayed == 0 && currentData.length === data.length) {
+      margin = {top: 50, right: 0, bottom: 20, left: 40};
+      outerWidth = window.innerWidth - 200;
+    }
+    else {
+      outerWidth = window.innerWidth*0.9;
+      margin = {top: 50, right: 30, bottom: 20, left: 40};
+      svgStyle = {"margin": "0 auto"};
+    }
     var padding = {top: 25, right: 25, bottom: 25, left: 25};
-    var outerWidth = window.innerWidth*0.8;
     var outerHeight = window.innerHeight*0.7;
     var innerWidth = outerWidth - margin.left - margin.right;
     var innerHeight = outerHeight - margin.top - margin.bottom;
@@ -295,6 +399,7 @@ class App extends Component {
         className="container"
         height={outerHeight}
         width={outerWidth}
+        style={svgStyle}
       >
         <g
           className="xAxis"
@@ -358,30 +463,40 @@ class App extends Component {
   }
 
   render() {
+    var leaderboardJSX = [];
+    var records = this.state.records;
+    if (records.gamesPlayed >= 1) {
+      leaderboardJSX.push(
+        <div className="leaderboard">
+          <h3>Leaderboard</h3>
+          <div className="leader-content-container">
+            <div className="leader-content">
+              <p><span style={{"font-weight":"bold"}}>1st</span> {records.leaderboard[0].name}: {records.leaderboard[0].score}</p>
+              <p><span style={{"font-weight":"bold"}}>2nd</span> {records.leaderboard[1].name}: {records.leaderboard[1].score}</p>
+              <p><span style={{"font-weight":"bold"}}>3rd</span> {records.leaderboard[2].name}: {records.leaderboard[2].score}</p>
+            </div>
+          </div>
+        </div>
+      );
+      var data = this.state.data.slice();
+      var currentData = this.state.currentData.slice();
+      var currentUserScatterData = this.state.currentUserScatterData.slice();
+      var currentUserScatterColor = this.state.currentUserScatterColor.slice();
+      var currentMLScatterData = this.state.currentMLScatterData.slice();
+      var currentMLScatterColor = this.state.currentMLScatterColor.slice();
+    }
+    else {
+      leaderboardJSX.push(
+        <div className="leaderboard"></div>
+      );
+    }
+    var podium = this.state.podium;
     var svgJSX = this.state.svgJSX.slice();
     var stockDataJSX = [];
     var gettingNewStock = this.state.gettingNewStock;
     var userStockData = this.state.userStockData;
     var mlStockData = this.state.mlStockData;
     var bankStr;
-    var podium = [
-      {
-        name: 'User',
-        stockValue: parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)
-      },
-      {
-        name: 'AI',
-        stockValue: parseFloat(mlStockData.currentStockValue) + parseFloat(mlStockData.bank)
-      },
-      {
-        name: 'Market',
-        stockValue: userStockData.finalStockValue
-      }
-    ];
-    podium.sort(function (a, b) {
-        return b.stockValue - a.stockValue;
-      }
-    );
     if (userStockData.bank < 0) {
       bankStr = '-$' + (-1*userStockData.bank);
     }
@@ -403,15 +518,24 @@ class App extends Component {
     }
     if (this.state.currentData.length > 0 && this.state.data.length === this.state.currentData.length && !gettingNewStock) {
       stockDataJSX.push(<br />);
-      stockDataJSX.push(<p>1st: {podium[0].name}: ${podium[0].stockValue.toFixed(2)}</p>);
-      stockDataJSX.push(<p>2nd: {podium[1].name}: ${podium[1].stockValue.toFixed(2)}</p>);
-      stockDataJSX.push(<p>3rd: {podium[2].name}: ${podium[2].stockValue.toFixed(2)}</p>);
+      stockDataJSX.push(
+        <div className="podium-container">
+          <div className="podium">
+            <p><span style={{"font-weight":"bold"}}>1st</span> {podium[0].name}: ${podium[0].stockValue.toFixed(2)}</p>
+            <p><span style={{"font-weight":"bold"}}>2nd</span> {podium[1].name}: ${podium[1].stockValue.toFixed(2)}</p>
+            <p><span style={{"font-weight":"bold"}}>3rd</span> {podium[2].name}: ${podium[2].stockValue.toFixed(2)}</p>
+          </div>
+        </div>
+      );
     }
     return (
       <div>
-        <button onClick={() => {this.handleStart()}} style={{'display':'block', 'margin': '0 auto', 'margin-top': '20px'}}>Start</button>
-        {svgJSX}
+        <div className="content-container">
+          {svgJSX}
+          {leaderboardJSX}
+        </div>
         {stockDataJSX}
+        <button onClick={() => {this.handleStart()}} className="btn" >Start</button>
       </div>
     );
   }

@@ -30,7 +30,7 @@ def getStockData():
     mlData = FormatForModel(mlData)
 
     forecast_col = 'Adj. Close'
-    forecast_out = int(math.ceil(0.1*dataLength))
+    forecast_out = int(math.ceil(0.12*dataLength))
 
     mlData['label'] = mlData[forecast_col].shift(-forecast_out)
     mlData.dropna(inplace=True)
