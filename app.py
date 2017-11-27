@@ -14,7 +14,7 @@ def getStockData():
     stock = request.args.get('stock', default=None, type=None)
     quandl.ApiConfig.api_key = "qWcicxSctVxrP9PhyneG"
     allData = quandl.get('WIKI/'+stock)
-    dataLength = 365
+    dataLength = 251
     allDataLength = len(allData)
     firstDataElem = math.floor(random.random()*(allDataLength-dataLength))
     mlData = allData[0:firstDataElem+dataLength]

@@ -38,13 +38,11 @@ class App extends Component {
         ['Salesforce','CRM'],
         ["Macy's", 'M'],
         ['Advanced Auto Parts Inc.','AAP'],
-        ['Baker Hughes','BHGE'],
         ['Marathon Oil','MRO'],
         ['Kroger','KR'],
         ['Foot Locker','FL'],
         ['Target','TGT'],
         ['Bed Bath & Beyond','BBBY'],
-        ['Hilton Worldwide Holdings','HLT'],
         ['AutoZone','AZO'],
         ['Under Armour','UAA'],
         ['Mattel', 'MAT'],
@@ -104,11 +102,13 @@ class App extends Component {
           name: 'Market',
           stockValue: 0
         }
-      ]
+      ],
+      resizing: false
     }
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
     this.handleStart = this.handleStart.bind(this);
+    this.handleResize = this.handleResize.bind(this);
     this.handleBuySell = this.handleBuySell.bind(this);
     this.getNewStock = this.getNewStock.bind(this);
     this.checkMLBuySell = this.checkMLBuySell.bind(this);
@@ -117,6 +117,20 @@ class App extends Component {
 
   componentWillMount() {
     document.addEventListener("keydown", this.handleBuySell, false);
+    window.addEventListener("resize", this.handleResize, false);
+  }
+
+  handleResize() {
+    var currentData = this.state.currentData.slice();
+    var data = this.state.data.slice();
+    var currentUserScatterData = this.state.currentUserScatterData.slice();
+    var currentUserScatterColor = this.state.currentUserScatterColor.slice();
+    var currentMLScatterData = this.state.currentMLScatterData.slice();
+    var currentMLScatterColor = this.state.currentMLScatterColor.slice();
+    if (currentData.length > 0 && currentData.length === data.length) {
+      this.setState({resizing:true});
+      this.plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor);
+    }
   }
 
   getNewStock() {
@@ -159,26 +173,33 @@ class App extends Component {
   }
 
   handleStart() {
-    var userStockData = this.state.userStockData;
-    userStockData.currentStocks = userStockData.initialStocks;
-    userStockData.currentBuys = userStockData.initialBuys;
-    userStockData.currentSells = userStockData.initialSells;
-    userStockData.bank = 0;
-    var mlStockData = this.state.mlStockData;
-    mlStockData.currentStocks = mlStockData.initialStocks;
-    mlStockData.currentBuys = mlStockData.initialBuys;
-    mlStockData.currentSells = mlStockData.initialSells;
-    mlStockData.bank = 0;
-    this.setState({
-      gettingNewStock: true,
-      userStockData: userStockData,
-      mlStockData: mlStockData
-    });
-    this.getNewStock();
+    if (document.getElementById('start-btn').classList.contains('btn-active')) {
+      document.getElementById('start-btn').style.backgroundColor = 'rgb(142, 142, 142)';
+      document.getElementById('start-btn').classList.toggle('btn-active');
+      var currentData = this.state.currentData.slice();
+      var data = this.state.data.slice();
+      var userStockData = this.state.userStockData;
+      var mlStockData = this.state.mlStockData;
+      if (currentData.length === data.length) {
+        userStockData.currentStocks = userStockData.initialStocks;
+        userStockData.currentBuys = userStockData.initialBuys;
+        userStockData.currentSells = userStockData.initialSells;
+        userStockData.bank = 0;
+        mlStockData.currentStocks = mlStockData.initialStocks;
+        mlStockData.currentBuys = mlStockData.initialBuys;
+        mlStockData.currentSells = mlStockData.initialSells;
+        mlStockData.bank = 0;
+        this.setState({
+          gettingNewStock: true,
+          userStockData: userStockData,
+          mlStockData: mlStockData
+        });
+        this.getNewStock();
+      }
+    }
   }
 
   handleBuySell = (event) => {
-    console.log(event.key);
     var userStockData = this.state.userStockData;
     if (event.key == 'ArrowDown' && userStockData.currentSells > 0) {
       this.setState({userSold:true});
@@ -224,7 +245,7 @@ class App extends Component {
       var mlShouldBuySell = this.checkMLBuySell(currentData);
       if (mlShouldBuySell) {
         if (mlShouldBuySell === 'buy') {
-          currentMLScatterColor.push("purple");
+          currentMLScatterColor.push("rgba(45, 65, 147, 0.4)");
           currentMLScatterData.push(currentData[currentData.length-1]);
           mlStockData.currentBuys--;
           mlStockData.currentStocks++;
@@ -232,7 +253,7 @@ class App extends Component {
           mlStockData.currentStockValue += lastStockPrice;
         }
         else if (mlShouldBuySell === 'sell') {
-          currentMLScatterColor.push("green");
+          currentMLScatterColor.push("rgba(125, 3, 3, 0.4)");
           currentMLScatterData.push(currentData[currentData.length-1]);
           mlStockData.currentSells--;
           mlStockData.currentStocks--;
@@ -241,7 +262,7 @@ class App extends Component {
         }
       }
       if (this.state.userSold) {
-        currentUserScatterColor.push("red");
+        currentUserScatterColor.push("rgba(125, 3, 3, 1.0)");
         currentUserScatterData.push(currentData[currentData.length-1]);
         userStockData.currentSells--;
         userStockData.currentStocks--;
@@ -250,7 +271,7 @@ class App extends Component {
         this.setState({userSold:false});
       }
       else if (this.state.userBought) {
-        currentUserScatterColor.push("blue");
+        currentUserScatterColor.push("rgba(45, 65, 147, 1.0)");
         currentUserScatterData.push(currentData[currentData.length-1]);
         userStockData.currentBuys--;
         userStockData.currentStocks++;
@@ -264,11 +285,20 @@ class App extends Component {
         userStockData:userStockData,
         mlStockData:mlStockData
       });
+      var timeWait;
+      if (userStockData.currentBuys + userStockData.currentSells === 0) {
+        timeWait = 50;
+      }
+      else {
+        timeWait = 100;
+      }
       setTimeout(function () {
         this.plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor);
-      }.bind(this), 60);
+      }.bind(this), timeWait);
     }
     else {
+      document.getElementById('start-btn').style.backgroundColor = '#2790d6';
+      document.getElementById('start-btn').classList.toggle('btn-active');
       this.calcScore();
     }
   }
@@ -279,15 +309,15 @@ class App extends Component {
     var podium = [
       {
         name: 'User',
-        stockValue: parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)
+        stockValue: parseFloat((parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2))
       },
       {
         name: 'AI',
-        stockValue: parseFloat(mlStockData.currentStockValue) + parseFloat(mlStockData.bank)
+        stockValue: parseFloat((parseFloat(mlStockData.currentStockValue) + parseFloat(mlStockData.bank)).toFixed(2))
       },
       {
         name: 'Market',
-        stockValue: userStockData.finalStockValue
+        stockValue: parseFloat(userStockData.finalStockValue.toFixed(2))
       }
     ];
     podium.sort(function (a, b) {
@@ -295,9 +325,35 @@ class App extends Component {
       }
     );
     var lastScores = {};
-    lastScores[podium[0].name] = 2;
-    lastScores[podium[1].name] = 1;
-    lastScores[podium[2].name] = 0;
+    var pointsGiven = 0;
+    if (podium[0].stockValue !== podium[1].stockValue) {
+      lastScores[podium[0].name] = 3;
+      pointsGiven += 3;
+    }
+    if (podium[2].stockValue !== podium[1].stockValue) {
+      lastScores[podium[2].name] = 1;
+      pointsGiven += 1;
+    }
+    if (pointsGiven === 4) {
+      lastScores[podium[1].name] = 2;
+      pointsGiven += 2;
+    }
+    if (pointsGiven === 0) {
+      lastScores[podium[0].name] = 2;
+      lastScores[podium[1].name] = 2;
+      lastScores[podium[2].name] = 2;
+      pointsGiven += 6;
+    }
+    else if (pointsGiven === 3) {
+      lastScores[podium[1].name] = 1.5;
+      lastScores[podium[2].name] = 1.5;
+      pointsGiven += 3;
+    }
+    else if (pointsGiven === 1) {
+      lastScores[podium[0].name] = 2.5;
+      lastScores[podium[1].name] = 2.5;
+      pointsGiven += 5;
+    }
 
     var records = this.state.records;
     records.gamesPlayed++;
@@ -383,9 +439,10 @@ class App extends Component {
       title.push(
         <text
           x={(outerWidth/2)}
-          y={(margin.top / 1.5)}
+          y={(margin.top)}
           style={{
-            "font-size": "1.5em",
+            "font-size": "1.2em",
+            "font-weight": "bold",
             "text-anchor": "middle"
           }}
           >
@@ -457,9 +514,11 @@ class App extends Component {
       }
     );
     var gettingNewStock = this.state.gettingNewStock;
-    if (currentData.length !== 0 && !gettingNewStock) {
+    var resizing = this.state.resizing;
+    if (currentData.length !== 0 && !gettingNewStock && !resizing) {
       this.plotTimer();
     }
+    this.setState({resizing:false});
   }
 
   render() {
@@ -511,14 +570,26 @@ class App extends Component {
     if (userStockData.currentSells === 1) {
       sells = 'sell';
     }
+    var introJSX = [];
     if (svgJSX.length > 0) {
-      stockDataJSX.push(<p>You have {userStockData.currentStocks} stocks worth a total of ${userStockData.currentStockValue}</p>);
-      stockDataJSX.push(<p>You have {bankStr} cash in the bank</p>);
+      stockDataJSX.push(<p>You have {userStockData.currentStocks} stocks plus cash worth a total of ${(parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2)}</p>);
       stockDataJSX.push(<p>You have {userStockData.currentBuys} {buys} and {userStockData.currentSells} {sells} left</p>);
     }
+    else {
+      introJSX.push(
+        <div id="intro">
+          <h2>Welcome to StockIT!</h2>
+          <h4>Test your stock-picking skills against the market and a machine learning algorithm</h4>
+          <p>A random 365-day period of a random stock will be chosen. You and the AI will each start with 3 stocks, 3 "buys", and 3 "sells". Press the up arrow key to "buy" a stock, and press the down arrow key to "sell" a stock.</p>
+          <br />
+          <p>Good Luck!</p>
+        </div>
+      )
+    }
+    var podiumJSX = [];
+    podiumJSX.push(<br />);
     if (this.state.currentData.length > 0 && this.state.data.length === this.state.currentData.length && !gettingNewStock) {
-      stockDataJSX.push(<br />);
-      stockDataJSX.push(
+      podiumJSX.push(
         <div className="podium-container">
           <div className="podium">
             <p><span style={{"font-weight":"bold"}}>1st</span> {podium[0].name}: ${podium[0].stockValue.toFixed(2)}</p>
@@ -531,11 +602,15 @@ class App extends Component {
     return (
       <div>
         <div className="content-container">
-          {svgJSX}
+          {introJSX}
+          <div>
+            {svgJSX}
+            {stockDataJSX}
+            <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
+            {podiumJSX}
+          </div>
           {leaderboardJSX}
         </div>
-        {stockDataJSX}
-        <button onClick={() => {this.handleStart()}} className="btn" >Start</button>
       </div>
     );
   }
