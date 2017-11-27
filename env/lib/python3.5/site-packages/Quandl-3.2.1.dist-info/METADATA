@@ -1,0 +1,43 @@
+Metadata-Version: 2.0
+Name: Quandl
+Version: 3.2.1
+Summary: Package for quandl API access
+Home-page: https://github.com/quandl/quandl-python
+Author: Quandl Development Team
+Author-email: connect@quandl.com
+License: MIT
+Keywords: quandl,API,data,financial,economic
+Platform: UNKNOWN
+Requires-Dist: pandas (>=0.14)
+Requires-Dist: numpy (>=1.8)
+Requires-Dist: requests (<2.18,>=2.7.0)
+Requires-Dist: inflection (>=0.3.1)
+Requires-Dist: python-dateutil
+Requires-Dist: six
+Requires-Dist: more-itertools
+Requires-Dist: pyOpenSSL
+Requires-Dist: ndg-httpsclient
+Requires-Dist: pyasn1
+
+Official Quandl API Client for Python
+=========================================
+
+A Python library for Quandl's RESTful API.
+
+
+Setup
+=====
+
+You can install this package by using the pip tool and installing:
+
+    $ pip install quandl
+
+Or:
+
+    $ easy_install quandl
+
+Usage
+=====
+
+You can read more about developing and using the library here: https://github.com/quandl/quandl-python
+

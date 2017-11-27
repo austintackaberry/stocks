@@ -69,7 +69,6 @@ class ConnectionPool(object):
             raise LocationValueError("No host specified.")
 
         self.host = _ipv6_host(host).lower()
-        self._proxy_host = host.lower()
         self.port = port
 
     def __str__(self):
@@ -397,7 +396,7 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
 
         try:
             assert_header_parsing(httplib_response.msg)
-        except (HeaderParsingError, TypeError) as hpe:  # Platform-specific: Python 3
+        except HeaderParsingError as hpe:  # Platform-specific: Python 3
             log.warning(
                 'Failed to parse headers (url=%s): %s',
                 self._absolute_url(url), hpe, exc_info=True)
@@ -623,14 +622,25 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
             # Timed out by queue.
             raise EmptyPoolError(self, "No pool connections are available.")
 
-        except (TimeoutError, HTTPException, SocketError, ProtocolError,
-                BaseSSLError, SSLError, CertificateError) as e:
-            # Discard the connection for these exceptions. It will be
-            # replaced during the next _get_conn() call.
+        except (BaseSSLError, CertificateError) as e:
+            # Close the connection. If a connection is reused on which there
+            # was a Certificate error, the next request will certainly raise
+            # another Certificate error.
             clean_exit = False
-            if isinstance(e, (BaseSSLError, CertificateError)):
-                e = SSLError(e)
-            elif isinstance(e, (SocketError, NewConnectionError)) and self.proxy:
+            raise SSLError(e)
+
+        except SSLError:
+            # Treat SSLError separately from BaseSSLError to preserve
+            # traceback.
+            clean_exit = False
+            raise
+
+        except (TimeoutError, HTTPException, SocketError, ProtocolError) as e:
+            # Discard the connection for these exceptions. It will be
+            # be replaced during the next _get_conn() call.
+            clean_exit = False
+
+            if isinstance(e, (SocketError, NewConnectionError)) and self.proxy:
                 e = ProxyError('Cannot connect to proxy.', e)
             elif isinstance(e, (SocketError, HTTPException)):
                 e = ProtocolError('Connection aborted.', e)
@@ -667,15 +677,6 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                                 release_conn=release_conn, body_pos=body_pos,
                                 **response_kw)
 
-        def drain_and_release_conn(response):
-            try:
-                # discard any remaining response body, the connection will be
-                # released back to the pool once the entire response is read
-                response.read()
-            except (TimeoutError, HTTPException, SocketError, ProtocolError,
-                    BaseSSLError, SSLError) as e:
-                pass
-
         # Handle redirect?
         redirect_location = redirect and response.get_redirect_location()
         if redirect_location:
@@ -686,14 +687,11 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                 retries = retries.increment(method, url, response=response, _pool=self)
             except MaxRetryError:
                 if retries.raise_on_redirect:
-                    # Drain and release the connection for this response, since
-                    # we're not returning it to be released manually.
-                    drain_and_release_conn(response)
+                    # Release the connection for this response, since we're not
+                    # returning it to be released manually.
+                    response.release_conn()
                     raise
                 return response
-
-            # drain and return the connection to the pool before recursing
-            drain_and_release_conn(response)
 
             retries.sleep_for_retry(response)
             log.debug("Redirecting %s -> %s", url, redirect_location)
@@ -712,15 +710,11 @@ class HTTPConnectionPool(ConnectionPool, RequestMethods):
                 retries = retries.increment(method, url, response=response, _pool=self)
             except MaxRetryError:
                 if retries.raise_on_status:
-                    # Drain and release the connection for this response, since
-                    # we're not returning it to be released manually.
-                    drain_and_release_conn(response)
+                    # Release the connection for this response, since we're not
+                    # returning it to be released manually.
+                    response.release_conn()
                     raise
                 return response
-
-            # drain and return the connection to the pool before recursing
-            drain_and_release_conn(response)
-
             retries.sleep(response)
             log.debug("Retry: %s", url)
             return self.urlopen(
@@ -809,9 +803,9 @@ class HTTPSConnectionPool(HTTPConnectionPool):
             set_tunnel = conn._set_tunnel
 
         if sys.version_info <= (2, 6, 4) and not self.proxy_headers:  # Python 2.6.4 and older
-            set_tunnel(self._proxy_host, self.port)
+            set_tunnel(self.host, self.port)
         else:
-            set_tunnel(self._proxy_host, self.port, self.proxy_headers)
+            set_tunnel(self.host, self.port, self.proxy_headers)
 
         conn.connect()
 
