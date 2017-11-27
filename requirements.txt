@@ -1,4 +1,3 @@
-adium-theme-ubuntu==0.3.4
 blinker==1.4
 ccsm==0.9.12.2
 certifi==2017.7.27.1
