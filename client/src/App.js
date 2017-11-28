@@ -110,6 +110,8 @@ class App extends Component {
     this.handleStart = this.handleStart.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.handleBuySell = this.handleBuySell.bind(this);
+    this.handleBuy = this.handleBuy.bind(this);
+    this.handleSell = this.handleSell.bind(this);
     this.getNewStock = this.getNewStock.bind(this);
     this.checkMLBuySell = this.checkMLBuySell.bind(this);
     this.calcScore = this.calcScore.bind(this);
@@ -206,6 +208,18 @@ class App extends Component {
     }
     if (event.key == 'ArrowUp' && userStockData.currentBuys > 0) {
       this.setState({userBought:true});
+    }
+  }
+  handleBuy = (event) => {
+    var userStockData = this.state.userStockData;
+    if (userStockData.currentBuys > 0) {
+      this.setState({userBought:true});
+    }
+  }
+  handleSell = (event) => {
+    var userStockData = this.state.userStockData;
+    if (userStockData.currentSells > 0) {
+      this.setState({userSold:true});
     }
   }
 
@@ -524,6 +538,8 @@ class App extends Component {
   render() {
     var leaderboardJSX = [];
     var records = this.state.records;
+    var data = this.state.data.slice();
+    var currentData = this.state.currentData.slice();
     if (records.gamesPlayed >= 1) {
       leaderboardJSX.push(
         <div className="leaderboard">
@@ -537,8 +553,6 @@ class App extends Component {
           </div>
         </div>
       );
-      var data = this.state.data.slice();
-      var currentData = this.state.currentData.slice();
       var currentUserScatterData = this.state.currentUserScatterData.slice();
       var currentUserScatterColor = this.state.currentUserScatterColor.slice();
       var currentMLScatterData = this.state.currentMLScatterData.slice();
@@ -571,6 +585,8 @@ class App extends Component {
       sells = 'sell';
     }
     var introJSX = [];
+    var buySellJSX = [];
+    var startJSX = [];
     if (svgJSX.length > 0) {
       stockDataJSX.push(<p>You have {userStockData.currentStocks} stocks plus cash worth a total of ${(parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2)}</p>);
       stockDataJSX.push(<p>You have {userStockData.currentBuys} {buys} and {userStockData.currentSells} {sells} left</p>);
@@ -583,8 +599,24 @@ class App extends Component {
           <p>A random 365-day period of a random stock will be chosen. You and the AI will each start with 3 stocks, 3 "buys", and 3 "sells". Press the up arrow key to "buy" a stock, and press the down arrow key to "sell" a stock.</p>
           <br />
           <p>Good Luck!</p>
+          <br />
         </div>
       )
+    }
+    if (currentData.length === data.length) {
+      startJSX.push(
+        <div id="start-buy-sell-container">
+          <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
+        </div>
+      );
+    }
+    else {
+      buySellJSX.push(
+        <div id="start-buy-sell-container">
+          <button onClick={() => {this.handleBuy()}} id="buy-btn" className="btn btn-active" >Buy</button>
+          <button onClick={() => {this.handleSell()}} id="sell-btn" className="btn btn-active" >Sell</button>
+        </div>
+      );
     }
     var podiumJSX = [];
     podiumJSX.push(<br />);
@@ -605,8 +637,9 @@ class App extends Component {
           {introJSX}
           <div>
             {svgJSX}
+            {startJSX}
+            {buySellJSX}
             {stockDataJSX}
-            <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
             {podiumJSX}
           </div>
           {leaderboardJSX}

@@ -2,12 +2,10 @@
 
 # dependencies
 /node_modules
+/client/node_modules
 
 # testing
-/coverage
-
-# production
-/build
+/client/coverage
 
 # misc
 .DS_Store
@@ -15,6 +13,8 @@
 .env.development.local
 .env.test.local
 .env.production.local
+
+/env/lib
 
 npm-debug.log*
 yarn-debug.log*

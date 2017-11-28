@@ -17,7 +17,7 @@ path {
   vertical-align: top;
   padding-left: 10px;
   padding-right: 20px;
-  padding-top: 15px;
+  padding-top: 1.7%;
 }
 
 .leader-content p {
@@ -73,12 +73,27 @@ body {
   border-radius: 10px;
   color: #ffffff;
   font-size: 20px;
-  background: #2790d6;
   padding: 10px 20px 10px 20px;
   border-style: none;
-  display: block;
   margin: 0 auto;
-  margin-top: 20px;
+}
+
+#start-buy-sell-container {
+  margin: 0 auto;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#start-btn {
+  background: #2790d6;
+}
+#buy-btn {
+  background: rgb(45, 65, 147);
+  margin-right: 20px;
+}
+#sell-btn {
+  background: rgb(125, 3, 3);
+  margin-left: 20px;
 }
 
 #intro {
