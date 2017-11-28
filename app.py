@@ -9,6 +9,9 @@ import numpy as np
 from sklearn import preprocessing, cross_validation, svm
 from sklearn.linear_model import LinearRegression
 
+if ON_HEROKU in os.environ:
+    send_from_directory('client/build','index.html')
+
 @app.route('/getstockdata/')
 def getStockData():
     stock = request.args.get('stock', default=None, type=None)
