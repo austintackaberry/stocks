@@ -12,6 +12,7 @@ from sklearn.linear_model import LinearRegression
 
 if 'ON_HEROKU' in os.environ:
     @app.route('/')
+    def index():
         return send_from_directory('client/build','index.html')
 
 @app.route('/getstockdata/')
