@@ -1,6 +1,5 @@
 import requests
 from flask import Flask, request, jsonify, send_from_directory
-app = Flask(__name__)
 import pandas as pd
 import quandl
 import math
@@ -11,6 +10,7 @@ from sklearn import preprocessing, cross_validation, svm
 from sklearn.linear_model import LinearRegression
 
 if 'ON_HEROKU' in os.environ:
+    app = Flask(__name__, static_folder="client/build")
     @app.route('/')
     def index():
         return send_from_directory('client/build','index.html')
