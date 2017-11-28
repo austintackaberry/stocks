@@ -13,7 +13,7 @@ if 'ON_HEROKU' in os.environ:
     app = Flask(__name__, static_folder="client/build")
     @app.route('/<path:path>')
     def index(path):
-        return send_from_directory('client/build',path)
+        return send_from_directory('/',path)
 else:
     app = Flask(__name__)
 
