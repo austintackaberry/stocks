@@ -20,6 +20,9 @@ if 'ON_HEROKU' in os.environ:
     @app.route('/static/js/<filename>')
     def index_js(filename):
         return send_from_directory('client/build/static/js',filename)
+    @app.route('/service-worker.js')
+    def index_service_worker():
+        return send_from_directory('client/build', 'service-worker.js')
 
 @app.route('/getstockdata/')
 def getStockData():

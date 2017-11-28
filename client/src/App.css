@@ -85,14 +85,14 @@ body {
 }
 
 #start-btn {
-  background: #2790d6;
+  background: rgb(30, 149, 15);
 }
 #buy-btn {
-  background: rgb(45, 65, 147);
+  background: rgb(39, 144, 214);
   margin-right: 20px;
 }
 #sell-btn {
-  background: rgb(125, 3, 3);
+  background: rgb(175, 3, 3);
   margin-left: 20px;
 }
 

@@ -259,7 +259,7 @@ class App extends Component {
       var mlShouldBuySell = this.checkMLBuySell(currentData);
       if (mlShouldBuySell) {
         if (mlShouldBuySell === 'buy') {
-          currentMLScatterColor.push("rgba(45, 65, 147, 0.4)");
+          currentMLScatterColor.push("rgba(39, 144, 214, 0.4)");
           currentMLScatterData.push(currentData[currentData.length-1]);
           mlStockData.currentBuys--;
           mlStockData.currentStocks++;
@@ -267,7 +267,7 @@ class App extends Component {
           mlStockData.currentStockValue += lastStockPrice;
         }
         else if (mlShouldBuySell === 'sell') {
-          currentMLScatterColor.push("rgba(125, 3, 3, 0.4)");
+          currentMLScatterColor.push("rgba(175, 3, 3, 0.4)");
           currentMLScatterData.push(currentData[currentData.length-1]);
           mlStockData.currentSells--;
           mlStockData.currentStocks--;
@@ -276,7 +276,7 @@ class App extends Component {
         }
       }
       if (this.state.userSold) {
-        currentUserScatterColor.push("rgba(125, 3, 3, 1.0)");
+        currentUserScatterColor.push("rgba(175, 3, 3, 1.0)");
         currentUserScatterData.push(currentData[currentData.length-1]);
         userStockData.currentSells--;
         userStockData.currentStocks--;
@@ -285,7 +285,7 @@ class App extends Component {
         this.setState({userSold:false});
       }
       else if (this.state.userBought) {
-        currentUserScatterColor.push("rgba(45, 65, 147, 1.0)");
+        currentUserScatterColor.push("rgba(39, 144, 214, 1.0)");
         currentUserScatterData.push(currentData[currentData.length-1]);
         userStockData.currentBuys--;
         userStockData.currentStocks++;
@@ -311,8 +311,8 @@ class App extends Component {
       }.bind(this), timeWait);
     }
     else {
-      document.getElementById('start-btn').style.backgroundColor = '#2790d6';
-      document.getElementById('start-btn').classList.toggle('btn-active');
+      // document.getElementById('start-btn').style.backgroundColor = '#2790d6';
+      // document.getElementById('start-btn').classList.toggle('btn-active');
       this.calcScore();
     }
   }
