@@ -12,7 +12,7 @@ from sklearn.linear_model import LinearRegression
 if 'ON_HEROKU' in os.environ:
     app = Flask(__name__, static_folder="client/build")
     @app.route('/<path:path>')
-    def index():
+    def index(path):
         return send_from_directory('client/build',path)
 else:
     app = Flask(__name__)
