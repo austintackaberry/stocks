@@ -11,9 +11,12 @@ from sklearn.linear_model import LinearRegression
 
 if 'ON_HEROKU' in os.environ:
     app = Flask(__name__, static_folder="client/build")
-    @app.route('/')
+    @app.route('/<path:path>')
     def index():
-        return send_from_directory('client/build','index.html')
+        return send_from_directory('client/build',path)
+else:
+    app = Flask(__name__)
+
 
 @app.route('/getstockdata/')
 def getStockData():
