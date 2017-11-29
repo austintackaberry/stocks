@@ -400,19 +400,19 @@ class App extends Component {
     var outerWidth;
     var svgStyle = {};
     if (records.gamesPlayed > 0) {
-      margin = {top: 50, right: 0, bottom: 20, left: 40};
+      margin = {top: window.innerHeight/20.0, right: 0, bottom: 20, left: 40};
       outerWidth = (window.innerWidth - document.getElementsByClassName('leaderboard')[0].offsetWidth);
     }
     else if (records.gamesPlayed == 0 && currentData.length === data.length) {
-      margin = {top: 50, right: 0, bottom: 20, left: 40};
+      margin = {top: window.innerHeight/20.0, right: 0, bottom: 20, left: 40};
       outerWidth = window.innerWidth - 200;
     }
     else {
       outerWidth = window.innerWidth*0.9;
-      margin = {top: 50, right: 30, bottom: 20, left: 40};
+      margin = {top: window.innerHeight/20.0, right: 30, bottom: 20, left: 40};
       svgStyle = {"margin": "0 auto"};
     }
-    var padding = {top: 25, right: 25, bottom: 25, left: 25};
+    var padding = {top: window.innerHeight/39.0, right: 25, bottom: 25, left: 25};
     var outerHeight = window.innerHeight*0.7;
     var innerWidth = outerWidth - margin.left - margin.right;
     var innerHeight = outerHeight - margin.top - margin.bottom;
