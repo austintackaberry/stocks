@@ -23,9 +23,15 @@ if 'ON_HEROKU' in os.environ:
     @app.route('/service-worker.js')
     def index_service_worker():
         return send_from_directory('client/build', 'service-worker.js')
-    @app.route('/favicon.ico')
-    def index_favicon():
-        return send_from_directory('client/build', 'favicon.ico')
+    @app.route('/favicon-16x16.png')
+    def index_favicon16():
+        return send_from_directory('client/build', 'favicon-16x16.png')
+    @app.route('/favicon-32x32.png')
+    def index_favicon32():
+        return send_from_directory('client/build', 'favicon-32x32.png')
+    @app.route('/favicon-96x96.png')
+    def index_favicon96():
+        return send_from_directory('client/build', 'favicon-96x96.png')
 
 @app.route('/getstockdata/')
 def getStockData():
