@@ -401,11 +401,11 @@ class App extends Component {
     var svgStyle = {};
     if (records.gamesPlayed > 0) {
       margin = {top: window.innerHeight/20.0, right: 0, bottom: 20, left: 40};
-      outerWidth = (window.innerWidth - document.getElementsByClassName('leaderboard')[0].offsetWidth);
+      outerWidth = (window.innerWidth - document.getElementById('leaderboard').offsetWidth);
     }
     else if (records.gamesPlayed == 0 && currentData.length === data.length) {
       margin = {top: window.innerHeight/20.0, right: 0, bottom: 20, left: 40};
-      outerWidth = window.innerWidth - 200;
+      outerWidth = window.innerWidth*0.8;
     }
     else {
       outerWidth = window.innerWidth*0.9;
@@ -561,9 +561,9 @@ class App extends Component {
         sellBtnStyle.background = 'rgb(175, 3, 3)';
       }
     }
-    if (records.gamesPlayed >= 1) {
+    if (records.gamesPlayed >= 1 || (data.length > 0 && currentData.length >= data.length-1)) {
       leaderboardJSX.push(
-        <div className="leaderboard">
+        <div id="leaderboard">
           <h3>Leaderboard</h3>
           <div className="leader-content-container">
             <div className="leader-content">
@@ -581,7 +581,7 @@ class App extends Component {
     }
     else {
       leaderboardJSX.push(
-        <div className="leaderboard"></div>
+        <div id="leaderboard"></div>
       );
     }
     var podium = this.state.podium;

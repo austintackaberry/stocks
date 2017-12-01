@@ -12,7 +12,7 @@ path {
   width: 100%;
 }
 
-.leaderboard {
+#leaderboard {
   display: table-cell;
   vertical-align: top;
   padding-left: 10px;
@@ -100,7 +100,7 @@ body {
 }
 
 .landing {
-  width: 80%;
+  width: 60%;
   margin: 0 auto;
   margin-top: 40px;
   max-width: 800px;
