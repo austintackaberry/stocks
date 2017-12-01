@@ -98,8 +98,18 @@ body {
 
 #intro {
   text-align: center;
+  margin: 0 auto;
+}
+
+.landing {
   width: 80%;
   margin: 0 auto;
+  margin-top: 40px;
+  max-width: 800px;
+  border: 1px solid rgb(174, 176, 182);
+  background-color: rgb(205, 206, 210);
+  border-radius: 5px;
+  padding: 15px 30px 15px 30px;
 }
 
 .btn:focus{

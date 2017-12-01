@@ -588,6 +588,8 @@ class App extends Component {
     var buySellJSX = [];
     var startJSX = [];
     if (svgJSX.length > 0) {
+      document.getElementById('container').classList.add('content-container');
+      document.getElementById('container').classList.remove('landing');
       stockDataJSX.push(<p>You have {userStockData.currentStocks} stocks plus cash worth a total of ${(parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2)}</p>);
       stockDataJSX.push(<p>You have {userStockData.currentBuys} {buys} and {userStockData.currentSells} {sells} left</p>);
     }
@@ -633,7 +635,7 @@ class App extends Component {
     }
     return (
       <div>
-        <div className="content-container">
+        <div id="container" className="landing">
           {introJSX}
           <div>
             {svgJSX}
