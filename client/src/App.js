@@ -540,6 +540,27 @@ class App extends Component {
     var records = this.state.records;
     var data = this.state.data.slice();
     var currentData = this.state.currentData.slice();
+    var userStockData = this.state.userStockData;
+    var buyBtnStyle = {};
+    var sellBtnStyle = {};
+    if (document.getElementById('buy-btn') && currentData.length >= 1) {
+      document.getElementById('buy-btn').classList.add('btn-active');
+      document.getElementById('sell-btn').classList.add('btn-active');
+      if (userStockData.currentBuys === 0) {
+        document.getElementById('buy-btn').classList.toggle('btn-active');
+        buyBtnStyle.background = 'rgb(142, 142, 142)';
+      }
+      else {
+        buyBtnStyle.background = 'rgb(39, 144, 214)';
+      }
+      if (userStockData.currentSells === 0) {
+        document.getElementById('sell-btn').classList.toggle('btn-active');
+        sellBtnStyle.background = 'rgb(142, 142, 142)';
+      }
+      else {
+        sellBtnStyle.background = 'rgb(175, 3, 3)';
+      }
+    }
     if (records.gamesPlayed >= 1) {
       leaderboardJSX.push(
         <div className="leaderboard">
@@ -567,7 +588,6 @@ class App extends Component {
     var svgJSX = this.state.svgJSX.slice();
     var stockDataJSX = [];
     var gettingNewStock = this.state.gettingNewStock;
-    var userStockData = this.state.userStockData;
     var mlStockData = this.state.mlStockData;
     var bankStr;
     if (userStockData.bank < 0) {
@@ -592,6 +612,21 @@ class App extends Component {
       document.getElementById('container').classList.remove('landing');
       stockDataJSX.push(<p>You have {userStockData.currentStocks} stocks plus cash worth a total of ${(parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2)}</p>);
       stockDataJSX.push(<p>You have {userStockData.currentBuys} {buys} and {userStockData.currentSells} {sells} left</p>);
+      if (currentData.length !== 0 && currentData.length  === data.length) {
+        startJSX.push(
+          <div id="start-buy-sell-container">
+            <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
+          </div>
+        );
+      }
+      else {
+        buySellJSX.push(
+          <div id="start-buy-sell-container">
+            <button onClick={() => {this.handleBuy()}} id="buy-btn" className="btn" style={buyBtnStyle} >Buy</button>
+            <button onClick={() => {this.handleSell()}} id="sell-btn" className="btn" style={sellBtnStyle} >Sell</button>
+          </div>
+        );
+      }
     }
     else {
       introJSX.push(
@@ -603,23 +638,14 @@ class App extends Component {
           <p>Good Luck!</p>
           <br />
         </div>
-      )
-    }
-    if (currentData.length === data.length) {
+      );
       startJSX.push(
         <div id="start-buy-sell-container">
           <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
         </div>
       );
     }
-    else {
-      buySellJSX.push(
-        <div id="start-buy-sell-container">
-          <button onClick={() => {this.handleBuy()}} id="buy-btn" className="btn btn-active" >Buy</button>
-          <button onClick={() => {this.handleSell()}} id="sell-btn" className="btn btn-active" >Sell</button>
-        </div>
-      );
-    }
+
     var podiumJSX = [];
     podiumJSX.push(<br />);
     if (this.state.currentData.length > 0 && this.state.data.length === this.state.currentData.length && !gettingNewStock) {
