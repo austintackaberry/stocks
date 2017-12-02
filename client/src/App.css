@@ -16,7 +16,7 @@ path {
 #leaderboard {
   display: table-cell;
   vertical-align: top;
-  padding-left: 10px;
+  padding-left: 20px;
   padding-right: 20px;
 }
 
@@ -99,6 +99,11 @@ p {
 
 body {
   background-color: #f6f7f9;
+  width: 100%;
+}
+
+html {
+  width: 100%;
 }
 
 .btn {

@@ -319,8 +319,6 @@ class App extends Component {
       }.bind(this), timeWait);
     }
     else {
-      // document.getElementById('start-btn').style.backgroundColor = '#2790d6';
-      // document.getElementById('start-btn').classList.toggle('btn-active');
       this.calcScore();
     }
   }
@@ -403,7 +401,6 @@ class App extends Component {
   }
 
   plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor) {
-    // var records = this.state.records;
     var margin;
     var outerWidth;
     var svgStyle = {};
@@ -605,15 +602,10 @@ class App extends Component {
         <div id="leaderboard"></div>
       );
     }
-    // var currentUserScatterData = this.state.currentUserScatterData.slice();
-    // var currentUserScatterColor = this.state.currentUserScatterColor.slice();
-    // var currentMLScatterData = this.state.currentMLScatterData.slice();
-    // var currentMLScatterColor = this.state.currentMLScatterColor.slice();
     var podium = this.state.podium;
     var svgJSX = this.state.svgJSX.slice();
     var stockDataJSX = [];
     var gettingNewStock = this.state.gettingNewStock;
-    // var mlStockData = this.state.mlStockData;
     var bankStr;
     if (userStockData.bank < 0) {
       bankStr = '-$' + (-1*userStockData.bank);
