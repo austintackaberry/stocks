@@ -126,6 +126,7 @@ class App extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.lbIsHidden !== prevState.lbIsHidden) {
+      document.body.style.zoom = 1.0;
       this.handleResize();
     }
 }
