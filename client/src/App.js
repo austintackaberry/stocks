@@ -103,7 +103,8 @@ class App extends Component {
           stockValue: 0
         }
       ],
-      resizing: false
+      resizing: false,
+      lbIsHidden: false
     }
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
@@ -115,12 +116,19 @@ class App extends Component {
     this.getNewStock = this.getNewStock.bind(this);
     this.checkMLBuySell = this.checkMLBuySell.bind(this);
     this.calcScore = this.calcScore.bind(this);
+    this.handleLbClick = this.handleLbClick.bind(this);
   }
 
   componentWillMount() {
     document.addEventListener("keydown", this.handleBuySell, false);
     window.addEventListener("resize", this.handleResize, false);
   }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.lbIsHidden !== prevState.lbIsHidden) {
+      this.handleResize();
+    }
+}
 
   handleResize() {
     var currentData = this.state.currentData.slice();
@@ -395,23 +403,12 @@ class App extends Component {
   }
 
   plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor) {
-    var records = this.state.records;
+    // var records = this.state.records;
     var margin;
     var outerWidth;
     var svgStyle = {};
-    if (records.gamesPlayed > 0) {
-      margin = {top: window.innerHeight/20.0, right: 0, bottom: 20, left: 40};
-      outerWidth = (window.innerWidth - document.getElementById('leaderboard').offsetWidth);
-    }
-    else if (records.gamesPlayed == 0 && currentData.length === data.length) {
-      margin = {top: window.innerHeight/20.0, right: 0, bottom: 20, left: 40};
-      outerWidth = window.innerWidth*0.8;
-    }
-    else {
-      outerWidth = window.innerWidth*0.9;
-      margin = {top: window.innerHeight/20.0, right: 30, bottom: 20, left: 40};
-      svgStyle = {"margin": "0 auto"};
-    }
+    margin = {top: window.innerHeight/20.0, right: 10, bottom: 20, left: 35};
+    outerWidth = (window.innerWidth - document.getElementById('leaderboard').offsetWidth);
     var padding = {top: window.innerHeight/39.0, right: 25, bottom: 25, left: 25};
     var outerHeight = window.innerHeight*0.7;
     var innerWidth = outerWidth - margin.left - margin.right;
@@ -535,6 +532,16 @@ class App extends Component {
     this.setState({resizing:false});
   }
 
+  handleLbClick() {
+    document.getElementById('hamburger').classList.toggle("change");
+    if (this.state.lbIsHidden) {
+      this.setState({lbIsHidden:false});
+    }
+    else {
+      this.setState({lbIsHidden:true});
+    }
+  }
+
   render() {
     var leaderboardJSX = [];
     var records = this.state.records;
@@ -562,33 +569,51 @@ class App extends Component {
       }
     }
     if (records.gamesPlayed >= 1 || (data.length > 0 && currentData.length >= data.length-1)) {
-      leaderboardJSX.push(
-        <div id="leaderboard">
-          <h3>Leaderboard</h3>
-          <div className="leader-content-container">
-            <div className="leader-content">
-              <p><span style={{"font-weight":"bold"}}>1st</span> {records.leaderboard[0].name}: {records.leaderboard[0].score}</p>
-              <p><span style={{"font-weight":"bold"}}>2nd</span> {records.leaderboard[1].name}: {records.leaderboard[1].score}</p>
-              <p><span style={{"font-weight":"bold"}}>3rd</span> {records.leaderboard[2].name}: {records.leaderboard[2].score}</p>
+      if (this.state.lbIsHidden) {
+        leaderboardJSX.push(
+          <div id="leaderboard">
+            <div id='hamburger' class="hb-container" onClick={() => {this.handleLbClick()}}>
+              <div class="bar1"></div>
+              <div class="bar2"></div>
+              <div class="bar3"></div>
             </div>
           </div>
-        </div>
-      );
-      var currentUserScatterData = this.state.currentUserScatterData.slice();
-      var currentUserScatterColor = this.state.currentUserScatterColor.slice();
-      var currentMLScatterData = this.state.currentMLScatterData.slice();
-      var currentMLScatterColor = this.state.currentMLScatterColor.slice();
+        );
+      }
+      else {
+        leaderboardJSX.push(
+          <div id="leaderboard" className="lb-border">
+            <div id='hamburger' class="hb-container change" onClick={() => {this.handleLbClick()}}>
+              <div class="bar1"></div>
+              <div class="bar2"></div>
+              <div class="bar3"></div>
+            </div>
+            <h3 id="lb-heading" >Leaderboard</h3>
+            <div className="leader-content-container">
+              <div className="leader-content">
+                <p><span style={{"font-weight":"bold"}}>1st</span> {records.leaderboard[0].name}: {records.leaderboard[0].score}</p>
+                <p><span style={{"font-weight":"bold"}}>2nd</span> {records.leaderboard[1].name}: {records.leaderboard[1].score}</p>
+                <p><span style={{"font-weight":"bold"}}>3rd</span> {records.leaderboard[2].name}: {records.leaderboard[2].score}</p>
+              </div>
+            </div>
+          </div>
+        );
+      }
     }
     else {
       leaderboardJSX.push(
         <div id="leaderboard"></div>
       );
     }
+    // var currentUserScatterData = this.state.currentUserScatterData.slice();
+    // var currentUserScatterColor = this.state.currentUserScatterColor.slice();
+    // var currentMLScatterData = this.state.currentMLScatterData.slice();
+    // var currentMLScatterColor = this.state.currentMLScatterColor.slice();
     var podium = this.state.podium;
     var svgJSX = this.state.svgJSX.slice();
     var stockDataJSX = [];
     var gettingNewStock = this.state.gettingNewStock;
-    var mlStockData = this.state.mlStockData;
+    // var mlStockData = this.state.mlStockData;
     var bankStr;
     if (userStockData.bank < 0) {
       bankStr = '-$' + (-1*userStockData.bank);
