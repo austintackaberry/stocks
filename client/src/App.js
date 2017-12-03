@@ -414,18 +414,21 @@ class App extends Component {
     var margin;
     var outerWidth;
     var svgStyle = {};
-    margin = {top: window.innerHeight/20.0, right: window.innerWidth/35.0, bottom: window.innerHeight/30.0, left: window.innerWidth/10.0};
+    margin = {top: window.innerHeight/20.0, right: window.innerWidth/35.0, bottom: window.innerHeight/45.0, left: window.innerWidth/12.0};
     if (margin.top > 20) {
       margin.top = 20;
     }
+    if (margin.bottom > 20) {
+      margin.bottom = 20;
+    }
     if (margin.left > 30) {
-      margin.left = 35;
+      margin.left = 30;
     }
     if (margin.right > 10) {
       margin.right = 10;
     }
     outerWidth = (window.innerWidth - document.getElementById('leaderboard').offsetWidth);
-    var padding = {top: window.innerHeight/39.0, right: window.innerWidth/35.0, bottom: 25, left: 25};
+    var padding = {top: window.innerHeight/39.0, right: window.innerWidth/35.0, bottom: 20, left: 25};
     if (padding.right > 15) {
       padding.right = 15;
     }
