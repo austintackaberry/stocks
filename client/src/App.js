@@ -433,8 +433,8 @@ class App extends Component {
       padding.right = 15;
     }
     var outerHeight = window.innerHeight*0.7;
-    if (outerHeight > 2*outerWidth) {
-      outerHeight = 2*outerWidth;
+    if (outerHeight > 1.5*outerWidth) {
+      outerHeight = 1.5*outerWidth;
     }
     var innerWidth = outerWidth - margin.left - margin.right;
     var innerHeight = outerHeight - margin.top - margin.bottom;
