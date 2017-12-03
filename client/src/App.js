@@ -414,10 +414,25 @@ class App extends Component {
     var margin;
     var outerWidth;
     var svgStyle = {};
-    margin = {top: window.innerHeight/20.0, right: 10, bottom: 10, left: 35};
+    margin = {top: window.innerHeight/20.0, right: window.innerWidth/35.0, bottom: window.innerHeight/30.0, left: window.innerWidth/10.0};
+    if (margin.top > 20) {
+      margin.top = 20;
+    }
+    if (margin.left > 30) {
+      margin.left = 35;
+    }
+    if (margin.right > 10) {
+      margin.right = 10;
+    }
     outerWidth = (window.innerWidth - document.getElementById('leaderboard').offsetWidth);
-    var padding = {top: window.innerHeight/39.0, right: 25, bottom: 25, left: 25};
+    var padding = {top: window.innerHeight/39.0, right: window.innerWidth/35.0, bottom: 25, left: 25};
+    if (padding.right > 15) {
+      padding.right = 15;
+    }
     var outerHeight = window.innerHeight*0.7;
+    if (outerHeight > 2*outerWidth) {
+      outerHeight = 2*outerWidth;
+    }
     var innerWidth = outerWidth - margin.left - margin.right;
     var innerHeight = outerHeight - margin.top - margin.bottom;
     var width = innerWidth - padding.left - padding.right;
@@ -576,9 +591,13 @@ class App extends Component {
       }
     }
     if (records.gamesPlayed >= 1 || (data.length > 0 && currentData.length >= data.length-1)) {
+      var leaderboardStyle = {"padding-left": "2%", "padding-right": "20px"};
+      if (window.innerWidth * 0.02 > 20) {
+        leaderboardStyle['padding-left'] = "20px";
+      }
       if (this.state.lbIsHidden) {
         leaderboardJSX.push(
-          <div id="leaderboard">
+          <div id="leaderboard" style={leaderboardStyle}>
             <div id='hamburger' class="hb-container" onClick={() => {this.handleLbClick()}}>
               <div class="bar1"></div>
               <div class="bar2"></div>
@@ -589,7 +608,7 @@ class App extends Component {
       }
       else {
         leaderboardJSX.push(
-          <div id="leaderboard" className="lb-border">
+          <div id="leaderboard" style={leaderboardStyle} className="lb-border">
             <div id='hamburger' class="hb-container change" onClick={() => {this.handleLbClick()}}>
               <div class="bar1"></div>
               <div class="bar2"></div>
@@ -608,8 +627,12 @@ class App extends Component {
       }
     }
     else {
+      var leaderboardStyle = {"padding-left": "2%"};
+      if (window.innerWidth * 0.02 > 30) {
+        leaderboardStyle['padding-left'] = "30px";
+      }
       leaderboardJSX.push(
-        <div id="leaderboard"></div>
+        <div id="leaderboard" style={leaderboardStyle}></div>
       );
     }
     var podium = this.state.podium;
@@ -690,12 +713,14 @@ class App extends Component {
       <div>
         <div id="container" className="landing">
           {introJSX}
-          <div>
+          <div id="svg-container">
             {svgJSX}
             {startJSX}
-            {buySellJSX}
-            {stockDataJSX}
-            {podiumJSX}
+            <div id="below-svg">
+              {buySellJSX}
+              {stockDataJSX}
+              {podiumJSX}
+            </div>
           </div>
           {leaderboardJSX}
         </div>

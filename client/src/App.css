@@ -16,8 +16,16 @@ path {
 #leaderboard {
   display: table-cell;
   vertical-align: top;
-  padding-left: 20px;
-  padding-right: 20px;
+}
+
+#below-svg {
+  padding-left: 2%;
+  padding-right: 2%;
+}
+
+#svg-container {
+  width: 100%;
+  margin: 0 auto;
 }
 
 .hb-container {
