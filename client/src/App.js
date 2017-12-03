@@ -414,7 +414,7 @@ class App extends Component {
     var margin;
     var outerWidth;
     var svgStyle = {};
-    margin = {top: window.innerHeight/20.0, right: 10, bottom: 20, left: 35};
+    margin = {top: window.innerHeight/20.0, right: 10, bottom: 10, left: 35};
     outerWidth = (window.innerWidth - document.getElementById('leaderboard').offsetWidth);
     var padding = {top: window.innerHeight/39.0, right: 25, bottom: 25, left: 25};
     var outerHeight = window.innerHeight*0.7;
