@@ -73,6 +73,7 @@ class App extends Component {
       userBought: false,
       userSold: false,
       records: {
+        scoreHasBeenCalcd: false,
         gamesPlayed: 0,
         leaderboard: [
           {
@@ -260,7 +261,11 @@ class App extends Component {
     var currentUserScatterColor = this.state.currentUserScatterColor.slice();
     var currentMLScatterData = this.state.currentMLScatterData.slice();
     var currentMLScatterColor = this.state.currentMLScatterColor.slice();
+    var records = this.state.records;
     if (data.length !== currentData.length) {
+      if (records.scoreHasBeenCalcd) {
+        records.scoreHasBeenCalcd = false;
+      }
       currentData = data.slice(0,currentData.length+1);
       var userStockData = this.state.userStockData;
       var mlStockData = this.state.mlStockData;
@@ -320,8 +325,12 @@ class App extends Component {
       }.bind(this), timeWait);
     }
     else {
-      this.calcScore();
+      if (!records.scoreHasBeenCalcd) {
+        records.scoreHasBeenCalcd = true;
+        this.calcScore();
+      }
     }
+    this.setState({records:records});
   }
 
   calcScore() {
