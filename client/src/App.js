@@ -318,7 +318,7 @@ class App extends Component {
         timeWait = 50;
       }
       else {
-        timeWait = 120;
+        timeWait = 160;
       }
       setTimeout(function () {
         this.plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor);
