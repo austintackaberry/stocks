@@ -105,7 +105,8 @@ class App extends Component {
         }
       ],
       resizing: false,
-      lbIsHidden: false
+      lbIsHidden: false,
+      sliderVal: 50
     }
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
@@ -114,6 +115,7 @@ class App extends Component {
     this.handleBuySell = this.handleBuySell.bind(this);
     this.handleBuy = this.handleBuy.bind(this);
     this.handleSell = this.handleSell.bind(this);
+    this.handleSlider = this.handleSlider.bind(this);
     this.getNewStock = this.getNewStock.bind(this);
     this.checkMLBuySell = this.checkMLBuySell.bind(this);
     this.calcScore = this.calcScore.bind(this);
@@ -143,6 +145,10 @@ class App extends Component {
       this.setState({resizing:true});
       this.plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor);
     }
+  }
+
+  handleSlider() {
+    this.setState({sliderVal:this.slider.value});
   }
 
   getNewStock() {
@@ -318,7 +324,7 @@ class App extends Component {
         timeWait = 50;
       }
       else {
-        timeWait = 160;
+        timeWait = 450-this.state.sliderVal*4;
       }
       setTimeout(function () {
         this.plotGraph(data, currentData, currentUserScatterData, currentUserScatterColor, currentMLScatterData, currentMLScatterColor);
@@ -668,6 +674,9 @@ class App extends Component {
       if (currentData.length !== 0 && currentData.length  === data.length) {
         startJSX.push(
           <div id="start-buy-sell-container">
+            <div id="slidecontainer">
+              <input type="range" min="0" max="100" value={this.state.sliderVal} step="5" class="slider" id="myRange" />
+            </div>
             <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
           </div>
         );
@@ -675,6 +684,9 @@ class App extends Component {
       else {
         buySellJSX.push(
           <div id="start-buy-sell-container">
+            <div id="slidecontainer">
+              <input type="range" min="0" max="100" value={this.state.sliderVal} step="5" className="slider" id="myRange" onInput={() => {this.handleSlider()}} ref={input => this.slider = input} />
+            </div>
             <button onClick={() => {this.handleBuy()}} id="buy-btn" className="btn" style={buyBtnStyle} >Buy</button>
             <button onClick={() => {this.handleSell()}} id="sell-btn" className="btn" style={sellBtnStyle} >Sell</button>
           </div>
