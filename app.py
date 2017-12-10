@@ -23,6 +23,9 @@ if 'ON_HEROKU' in os.environ:
     @app.route('/service-worker.js')
     def index_service_worker():
         return send_from_directory('client/build', 'service-worker.js')
+    @app.route('/manifest.json')
+    def index_manifest():
+        return send_from_directory('client/build', 'manifest.json')
     @app.route('/favicon-16x16.png')
     def index_favicon16():
         return send_from_directory('client/build', 'favicon-16x16.png')
