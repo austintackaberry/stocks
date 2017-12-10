@@ -14,6 +14,9 @@ if 'ON_HEROKU' in os.environ:
     @app.route('/')
     def index():
         return send_from_directory('client/build','index.html')
+    @app.route('/index.html')
+    def index2():
+        return send_from_directory('client/build','index.html')
     @app.route('/static/css/<filename>')
     def index_css(filename):
         return send_from_directory('client/build/static/css',filename)
