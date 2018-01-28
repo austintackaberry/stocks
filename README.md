@@ -16,7 +16,7 @@ Now that you have installed all the required frontend packages, you can start th
 
 `npm start`
 
-Next you will need to open up an additional terminal and start up a server for the backend:
+Next you will need to open up an additional terminal and start up a server for the backend on port 5000:
 
 cd ..
 
