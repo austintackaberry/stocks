@@ -9,6 +9,7 @@ Pandas and Scikit Learn was used to develop a linear regression model to predict
 In order to run a dev server on your local host, you will need to first install all the required npm packages for the frontend.
 
 `cd client`
+
 `npm install`
 
 Now that you have installed all the required frontend packages, you can start the frontend server on port 3000:
@@ -20,6 +21,7 @@ Next you will need to open up an additional terminal and start up a server for t
 cd ..
 
 `export FLASK_APP=app.py`
+
 `flask run`
 
 Now you are all set up!
