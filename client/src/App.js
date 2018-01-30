@@ -3,7 +3,9 @@ import * as d3 from "d3";
 import './App.css';
 import Leaderboard from './components/Leaderboard.js';
 import Podium from './components/Podium.js';
+import Buttons from './components/Buttons.js';
 import StockData from './components/StockData.js';
+import Slider from './components/Slider.js';
 var async = require('async');
 
 class App extends Component {
@@ -576,26 +578,6 @@ class App extends Component {
     var data = this.state.data.slice();
     var currentData = this.state.currentData.slice();
     var userStockData = this.state.userStockData;
-    var buyBtnStyle = {};
-    var sellBtnStyle = {};
-    if (document.getElementById('buy-btn') && currentData.length >= 1) {
-      document.getElementById('buy-btn').classList.add('btn-active');
-      document.getElementById('sell-btn').classList.add('btn-active');
-      if (userStockData.currentBuys === 0) {
-        document.getElementById('buy-btn').classList.toggle('btn-active');
-        buyBtnStyle.background = 'rgb(142, 142, 142)';
-      }
-      else {
-        buyBtnStyle.background = 'rgb(39, 144, 214)';
-      }
-      if (userStockData.currentSells === 0) {
-        document.getElementById('sell-btn').classList.toggle('btn-active');
-        sellBtnStyle.background = 'rgb(142, 142, 142)';
-      }
-      else {
-        sellBtnStyle.background = 'rgb(175, 3, 3)';
-      }
-    }
     var podium = this.state.podium;
     var svgJSX = this.state.svgJSX.slice();
     var gettingNewStock = this.state.gettingNewStock;
@@ -615,7 +597,6 @@ class App extends Component {
       sells = 'sell';
     }
     var introJSX = [];
-    var buySellJSX = [];
     var startJSX = [];
     if (svgJSX.length > 0) {
       document.getElementById('container').classList.add('content-container');
@@ -627,17 +608,6 @@ class App extends Component {
               <input type="range" min="0" max="100" value={this.state.sliderVal} step="5" class="slider" id="myRange" />
             </div>
             <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
-          </div>
-        );
-      }
-      else {
-        buySellJSX.push(
-          <div id="start-buy-sell-container">
-            <div id="slidecontainer">
-              <input type="range" min="0" max="100" value={this.state.sliderVal} step="5" className="slider" id="myRange" onInput={() => {this.handleSlider()}} ref={input => this.slider = input} />
-            </div>
-            <button onClick={() => {this.handleBuy()}} id="buy-btn" className="btn" style={buyBtnStyle} >Buy</button>
-            <button onClick={() => {this.handleSell()}} id="sell-btn" className="btn" style={sellBtnStyle} >Sell</button>
           </div>
         );
       }
@@ -667,7 +637,20 @@ class App extends Component {
             {svgJSX}
             {startJSX}
             <div id="below-svg">
-              {buySellJSX}
+              <div id="start-buy-sell-container">
+                <div id="slidecontainer">
+                  <input type="range" min="0" max="100" value={this.state.sliderVal} step="5" className="slider" id="myRange" onInput={() => {this.handleSlider()}} ref={input => this.slider = input} />
+                </div>
+                <Slider />
+                <Buttons
+                  svgJSX={svgJSX}
+                  currentData={currentData}
+                  data={data}
+                  handleBuy={() => this.handleBuy()}
+                  handleSell={() => this.handleSell()}
+                  userStockData={userStockData}
+                />
+              </div>
               <StockData
                 svgJSX={svgJSX}
                 userStockData={userStockData}
