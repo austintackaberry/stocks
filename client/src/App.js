@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import * as d3 from "d3";
 import './App.css';
 import Leaderboard from './components/Leaderboard.js';
+import Podium from './components/Podium.js';
 var async = require('async');
 
 class App extends Component {
@@ -660,20 +661,6 @@ class App extends Component {
         </div>
       );
     }
-
-    var podiumJSX = [];
-    podiumJSX.push(<br />);
-    if (this.state.currentData.length > 0 && this.state.data.length === this.state.currentData.length && !gettingNewStock) {
-      podiumJSX.push(
-        <div className="podium-container">
-          <div className="podium">
-            <p><span style={{"font-weight":"bold"}}>1st</span> {podium[0].name}: ${podium[0].stockValue.toFixed(2)}</p>
-            <p><span style={{"font-weight":"bold"}}>2nd</span> {podium[1].name}: ${podium[1].stockValue.toFixed(2)}</p>
-            <p><span style={{"font-weight":"bold"}}>3rd</span> {podium[2].name}: ${podium[2].stockValue.toFixed(2)}</p>
-          </div>
-        </div>
-      );
-    }
     return (
       <div>
         <div id="container" className="landing">
@@ -684,7 +671,12 @@ class App extends Component {
             <div id="below-svg">
               {buySellJSX}
               {stockDataJSX}
-              {podiumJSX}
+              <Podium
+                currentData={currentData}
+                data={data}
+                gettingNewStock={gettingNewStock}
+                podium={podium}
+              />
             </div>
           </div>
           <Leaderboard

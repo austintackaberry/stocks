@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
 
 class Leaderboard extends Component {
-  constructor() {
-    super();
-
-  }
 
   render() {
     let hamburger;
@@ -13,10 +9,10 @@ class Leaderboard extends Component {
     let records = this.props.records;
     let data = this.props.data;
     let currentData = this.props.currentData;
-    let leaderboardStyle;
+    let leaderboardStyle = {paddingLeft:"2%"};
     if (records.gamesPlayed >= 1 || (data.length > 0 && currentData.length >= data.length-1)) {
       leaderboardClass = "";
-      leaderboardStyle = {"padding-left": "2%", "padding-right": "20px"};
+      leaderboardStyle.paddingRight = "20px";
       if (window.innerWidth * 0.02 > 20) {
         leaderboardStyle['padding-left'] = "20px";
       }
@@ -46,9 +42,8 @@ class Leaderboard extends Component {
         </div>;
     }
     else {
-      leaderboardStyle = {"padding-left": "2%"};
       if (window.innerWidth * 0.02 > 30) {
-        leaderboardStyle['padding-left'] = "30px";
+        leaderboardStyle.paddingLeft = "30px";
       }
       leaderboardClass = "";
     }
