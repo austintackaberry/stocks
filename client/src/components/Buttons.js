@@ -28,16 +28,16 @@ class Buttons extends Component {
     if (this.props.svgJSX.length > 0) {
       if (this.props.currentData.length === 0 || this.props.currentData.length  !== this.props.data.length) {
         buttonsJSX = (
-          <button onClick={() => {this.props.handleBuy()}} id="buy-btn" className="btn" style={buyBtnStyle} >Buy</button>
-          <button onClick={() => {this.props.handleSell()}} id="sell-btn" className="btn" style={sellBtnStyle} >Sell</button>
+          <div>
+            <button onClick={() => {this.props.handleBuy()}} id="buy-btn" className="btn" style={buyBtnStyle} >Buy</button>
+            <button onClick={() => {this.props.handleSell()}} id="sell-btn" className="btn" style={sellBtnStyle} >Sell</button>
+          </div>
         );
       }
     }
 
     return(
-      <div>
-        {buttonsJSX}
-      </div>
+      buttonsJSX
     );
   }
 }

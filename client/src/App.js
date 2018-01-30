@@ -111,7 +111,8 @@ class App extends Component {
       ],
       resizing: false,
       leaderboardIsHidden: false,
-      sliderVal: 50
+      sliderVal: 50,
+      showStartScreen: true,
     }
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
@@ -152,8 +153,8 @@ class App extends Component {
     }
   }
 
-  handleSlider() {
-    this.setState({sliderVal:this.slider.value});
+  handleSlider(event) {
+    this.setState({sliderVal:event.target.value});
   }
 
   getNewStock() {
@@ -187,7 +188,7 @@ class App extends Component {
           currentMLScatterColor: [],
           gettingNewStock: false,
           userStockData: userStockData,
-          mlStockData: mlStockData
+          mlStockData: mlStockData,
         });
         this.plotTimer();
         callback();
@@ -322,7 +323,7 @@ class App extends Component {
       mlStockData.currentStockValue = (lastStockPrice * mlStockData.currentStocks).toFixed(2);
       this.setState({
         userStockData:userStockData,
-        mlStockData:mlStockData
+        mlStockData:mlStockData,
       });
       var timeWait;
       if (userStockData.currentBuys + userStockData.currentSells === 0) {
@@ -558,6 +559,7 @@ class App extends Component {
         currentUserScatterColor: currentUserScatterColor,
         currentMLScatterData:currentMLScatterData,
         currentMLScatterColor: currentMLScatterColor,
+        showStartScreen: false
       }
     );
     var gettingNewStock = this.state.gettingNewStock;
@@ -604,9 +606,6 @@ class App extends Component {
       if (currentData.length !== 0 && currentData.length  === data.length) {
         startJSX.push(
           <div id="start-buy-sell-container">
-            <div id="slidecontainer">
-              <input type="range" min="0" max="100" value={this.state.sliderVal} step="5" class="slider" id="myRange" />
-            </div>
             <button onClick={() => {this.handleStart()}} id="start-btn" className="btn btn-active" >Start</button>
           </div>
         );
@@ -635,13 +634,14 @@ class App extends Component {
           {introJSX}
           <div id="svg-container">
             {svgJSX}
-            {startJSX}
             <div id="below-svg">
               <div id="start-buy-sell-container">
-                <div id="slidecontainer">
-                  <input type="range" min="0" max="100" value={this.state.sliderVal} step="5" className="slider" id="myRange" onInput={() => {this.handleSlider()}} ref={input => this.slider = input} />
-                </div>
-                <Slider />
+                <Slider
+                  sliderVal = {this.state.sliderVal}
+                  handleSlider={(event) => this.handleSlider(event)}
+                  showStartScreen={this.state.showStartScreen}
+                />
+                {startJSX}
                 <Buttons
                   svgJSX={svgJSX}
                   currentData={currentData}
