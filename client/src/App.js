@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from "d3";
 import './App.css';
+import Leaderboard from './components/Leaderboard.js';
 var async = require('async');
 
 class App extends Component {
@@ -105,7 +106,7 @@ class App extends Component {
         }
       ],
       resizing: false,
-      lbIsHidden: false,
+      leaderboardIsHidden: false,
       sliderVal: 50
     }
     this.plotGraph = this.plotGraph.bind(this);
@@ -119,7 +120,7 @@ class App extends Component {
     this.getNewStock = this.getNewStock.bind(this);
     this.checkMLBuySell = this.checkMLBuySell.bind(this);
     this.calcScore = this.calcScore.bind(this);
-    this.handleLbClick = this.handleLbClick.bind(this);
+    this.handleLeaderboardClick = this.handleLeaderboardClick.bind(this);
   }
 
   componentWillMount() {
@@ -128,7 +129,7 @@ class App extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.lbIsHidden !== prevState.lbIsHidden) {
+    if (this.state.leaderboardIsHidden !== prevState.leaderboardIsHidden) {
       document.body.style.zoom = 1.0;
       this.handleResize();
     }
@@ -563,18 +564,12 @@ class App extends Component {
     this.setState({resizing:false});
   }
 
-  handleLbClick() {
+  handleLeaderboardClick() {
     document.getElementById('hamburger').classList.toggle("change");
-    if (this.state.lbIsHidden) {
-      this.setState({lbIsHidden:false});
-    }
-    else {
-      this.setState({lbIsHidden:true});
-    }
+    this.setState({leaderboardIsHidden:!this.state.leaderboardIsHidden});
   }
 
   render() {
-    var leaderboardJSX = [];
     var records = this.state.records;
     var data = this.state.data.slice();
     var currentData = this.state.currentData.slice();
@@ -598,51 +593,6 @@ class App extends Component {
       else {
         sellBtnStyle.background = 'rgb(175, 3, 3)';
       }
-    }
-    if (records.gamesPlayed >= 1 || (data.length > 0 && currentData.length >= data.length-1)) {
-      var leaderboardStyle = {"padding-left": "2%", "padding-right": "20px"};
-      if (window.innerWidth * 0.02 > 20) {
-        leaderboardStyle['padding-left'] = "20px";
-      }
-      if (this.state.lbIsHidden) {
-        leaderboardJSX.push(
-          <div id="leaderboard" style={leaderboardStyle}>
-            <div id='hamburger' class="hb-container" onClick={() => {this.handleLbClick()}}>
-              <div class="bar1"></div>
-              <div class="bar2"></div>
-              <div class="bar3"></div>
-            </div>
-          </div>
-        );
-      }
-      else {
-        leaderboardJSX.push(
-          <div id="leaderboard" style={leaderboardStyle} className="lb-border">
-            <div id='hamburger' class="hb-container change" onClick={() => {this.handleLbClick()}}>
-              <div class="bar1"></div>
-              <div class="bar2"></div>
-              <div class="bar3"></div>
-            </div>
-            <h3 id="lb-heading" >Leaderboard</h3>
-            <div className="leader-content-container">
-              <div className="leader-content">
-                <p><span style={{"font-weight":"bold"}}>1st</span> {records.leaderboard[0].name}: {records.leaderboard[0].score}</p>
-                <p><span style={{"font-weight":"bold"}}>2nd</span> {records.leaderboard[1].name}: {records.leaderboard[1].score}</p>
-                <p><span style={{"font-weight":"bold"}}>3rd</span> {records.leaderboard[2].name}: {records.leaderboard[2].score}</p>
-              </div>
-            </div>
-          </div>
-        );
-      }
-    }
-    else {
-      var leaderboardStyle = {"padding-left": "2%"};
-      if (window.innerWidth * 0.02 > 30) {
-        leaderboardStyle['padding-left'] = "30px";
-      }
-      leaderboardJSX.push(
-        <div id="leaderboard" style={leaderboardStyle}></div>
-      );
     }
     var podium = this.state.podium;
     var svgJSX = this.state.svgJSX.slice();
@@ -737,7 +687,13 @@ class App extends Component {
               {podiumJSX}
             </div>
           </div>
-          {leaderboardJSX}
+          <Leaderboard
+            leaderboardIsHidden={this.state.leaderboardIsHidden}
+            handleLeaderboardClick={() => this.handleLeaderboardClick()}
+            records={records}
+            data={data}
+            currentData={currentData}
+          />
         </div>
       </div>
     );
