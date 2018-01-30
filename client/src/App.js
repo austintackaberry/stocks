@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import './App.css';
 import Leaderboard from './components/Leaderboard.js';
 import Podium from './components/Podium.js';
+import StockData from './components/StockData.js';
 var async = require('async');
 
 class App extends Component {
@@ -597,7 +598,6 @@ class App extends Component {
     }
     var podium = this.state.podium;
     var svgJSX = this.state.svgJSX.slice();
-    var stockDataJSX = [];
     var gettingNewStock = this.state.gettingNewStock;
     var bankStr;
     if (userStockData.bank < 0) {
@@ -620,8 +620,6 @@ class App extends Component {
     if (svgJSX.length > 0) {
       document.getElementById('container').classList.add('content-container');
       document.getElementById('container').classList.remove('landing');
-      stockDataJSX.push(<p>You have {userStockData.currentStocks} stocks plus cash worth a total of ${(parseFloat(userStockData.currentStockValue) + parseFloat(userStockData.bank)).toFixed(2)}</p>);
-      stockDataJSX.push(<p>You have {userStockData.currentBuys} {buys} and {userStockData.currentSells} {sells} left</p>);
       if (currentData.length !== 0 && currentData.length  === data.length) {
         startJSX.push(
           <div id="start-buy-sell-container">
@@ -670,7 +668,12 @@ class App extends Component {
             {startJSX}
             <div id="below-svg">
               {buySellJSX}
-              {stockDataJSX}
+              <StockData
+                svgJSX={svgJSX}
+                userStockData={userStockData}
+                buys={buys}
+                sells={sells}
+              />
               <Podium
                 currentData={currentData}
                 data={data}
