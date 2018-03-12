@@ -32,6 +32,7 @@ Now you are all set up!
 ## Built With
 
 * React
+* D3
 * Python
 * Flask
 * Pandas
