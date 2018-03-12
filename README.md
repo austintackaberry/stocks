@@ -16,11 +16,14 @@ Now that you have installed all the required frontend packages, you can start th
 
 `npm start`
 
-Next you will need to open up an additional terminal and start up a server for the backend on port 5000:
+Next you will need to install the required python packages:
 
-cd ..
+`cd ..`
+`pip install -r requirements.txt`
 
-`export FLASK_APP=app.py`
+Now you can open up an additional terminal and start up a server for the backend on port 5000:
+
+`python -m flask run FLASK_APP=app.py`
 
 `flask run`
 
