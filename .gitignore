@@ -14,8 +14,9 @@
 .env.test.local
 .env.production.local
 
-/env/lib
-env/lib64/python3.5/site-packages
+/env
+/venv
+/share
 
 npm-debug.log*
 yarn-debug.log*
