@@ -35,6 +35,7 @@ Install the requirements
 Now you can open up an additional terminal and start up a server for the backend on port 5000:
 
 `export FLASK_APP=app.py`
+
 `export FLASK_ENV=development`
 
 `flask run`
