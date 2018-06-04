@@ -14,9 +14,31 @@
 .env.test.local
 .env.production.local
 
-/env
-/venv
-/share
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+db.sqlite3
+migrations/
+media/
+settings.py
+
+# Distribution / packaging
+.Python
+venv/
+share/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 
 npm-debug.log*
 yarn-debug.log*
