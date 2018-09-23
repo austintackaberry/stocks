@@ -6,5 +6,9 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "pg": "^7.4.3"
   }
 }

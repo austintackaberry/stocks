@@ -71,10 +71,10 @@ def getStockData(stockSymbol):
 
 def insertStockData(stockList):
     delete_sql = "DELETE FROM stocks"
-    sql = "INSERT INTO stocks(name, symbol, data) VALUES(%s, %s, %s)"
+    sql = "INSERT INTO stocks(name, symbol, data, id) VALUES(%s, %s, %s, %s)"
 
     try:
-        conn = psycopg2.connect("dbname=stockit user=" + os.environ['DB_USERNAME'] +' password=' + os.environ['DB_PASSWORD'] + ' host=austintackaberry-stockit.c3tu2houar8w.us-west-1.rds.amazonaws.com')
+        conn = psycopg2.connect("dbname=stockit user=" + os.environ['PGUSER'] +' password=' + os.environ['PGPASSWORD'] + ' host=' + os.environ['PGHOST'])
 
         # create a new cursor
         cur = conn.cursor()
@@ -92,8 +92,8 @@ def insertStockData(stockList):
             conn.close()
 
 stockData = []
-for stock in stocks:
-    stockTuple = stock['name'], stock['symbol'], getStockData(stock["symbol"])
+for i, stock in enumerate(stocks):
+    stockTuple = stock['name'], stock['symbol'], getStockData(stock["symbol"]), i
     stockData.append(stockTuple)
 
 # pp.pprint(stockData)
