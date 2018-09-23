@@ -7,11 +7,12 @@ import os
 import numpy as np
 from sklearn import preprocessing, cross_validation, svm
 from sklearn.linear_model import LinearRegression
+import psycopg2
+import json
 
-def getStockData():
-    stock = request.args.get('stock', default=None, type=None)
+def getStockData(stockSymbol):
     quandl.ApiConfig.api_key = "qWcicxSctVxrP9PhyneG"
-    allData = quandl.get('WIKI/'+stock)
+    allData = quandl.get('WIKI/'+stockSymbol)
     dataLength = 251
     allDataLength = len(allData)
     firstDataElem = math.floor(random.random()*(allDataLength-dataLength))
@@ -51,5 +52,76 @@ def getStockData():
     data = data[['Adj. Close']]
     data = data.rename(columns={'Adj. Close':'EOD'})
     data['prediction'] = prediction[:]
-    data = data.to_json(orient='table')
-    return jsonify(data)
+
+    # Convert dataframe to dictionary
+    data = data.to_dict(orient='index')
+    returnData = []
+
+    # Format data
+    for key, value in data.items():
+        date = key.date()
+        stringDate = str(date.month) + '/' + str(date.day) + '/' + str(date.year)
+        returnData.append({"date": date, "EOD": value['EOD'], "prediction": value['prediction'], "stringDate":stringDate })
+    
+    # Sort data by date
+    returnData = sorted(returnData, key=lambda item: item['date'])
+
+    # Format data
+    for i, elem in enumerate(returnData):
+        returnData[i]['date'] = returnData[i]['stringDate']
+        del returnData[i]['stringDate']
+        
+    # Convert to json and stringify
+    return json.dumps(returnData)
+
+def insertStockData(stockList):
+    sql = "UPDATE stocks set data=%s where id=%s"
+
+    try:
+        conn = psycopg2.connect("dbname=stockit user=" + os.environ['PGUSER'] +' password=' + os.environ['PGPASSWORD'] + ' host=' + os.environ['PGHOST'])
+
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.executemany(sql,stockList)
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+def getSqlStockData():
+    sql = "SELECT name, symbol, id from stocks"
+
+    try:
+        conn = psycopg2.connect("dbname=stockit user=" + os.environ['PGUSER'] +' password=' + os.environ['PGPASSWORD'] + ' host=' + os.environ['PGHOST'])
+
+        # create a new cursor
+        cur = conn.cursor()
+        # execute the INSERT statement
+        cur.execute(sql)
+        data = cur.fetchall()
+        # close communication with the database
+        cur.close()
+        return data
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+stocks = getSqlStockData()
+stockData = []
+for stock in stocks:
+    name = stock[0]
+    symbol = stock[1]
+    id = stock[2]
+    data = getStockData(symbol)
+    stockTuple = data, id
+    stockData.append(stockTuple)
+
+insertStockData(stockData)

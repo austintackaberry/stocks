@@ -15,7 +15,7 @@ class Leaderboard extends Component {
       leaderboardClass = "";
       leaderboardStyle.paddingRight = "20px";
       if (window.innerWidth * 0.02 > 20) {
-        leaderboardStyle["padding-left"] = "20px";
+        leaderboardStyle["paddingLeft"] = "20px";
       }
       let hamburgerClass = "hb-container";
       leaderboardContent = <div />;
@@ -28,15 +28,15 @@ class Leaderboard extends Component {
             <div className="leader-content-container">
               <div className="leader-content">
                 <p>
-                  <span style={{ "font-weight": "bold" }}>1st</span>{" "}
+                  <span style={{ fontWeight: "bold" }}>1st</span>{" "}
                   {records.leaderboard[0].name}: {records.leaderboard[0].score}
                 </p>
                 <p>
-                  <span style={{ "font-weight": "bold" }}>2nd</span>{" "}
+                  <span style={{ fontWeight: "bold" }}>2nd</span>{" "}
                   {records.leaderboard[1].name}: {records.leaderboard[1].score}
                 </p>
                 <p>
-                  <span style={{ "font-weight": "bold" }}>3rd</span>{" "}
+                  <span style={{ fontWeight: "bold" }}>3rd</span>{" "}
                   {records.leaderboard[2].name}: {records.leaderboard[2].score}
                 </p>
               </div>
@@ -52,9 +52,9 @@ class Leaderboard extends Component {
             this.props.handleLeaderboardClick();
           }}
         >
-          <div class="bar1" />
-          <div class="bar2" />
-          <div class="bar3" />
+          <div className="bar1" />
+          <div className="bar2" />
+          <div className="bar3" />
         </Hamburger>
       );
     } else {
