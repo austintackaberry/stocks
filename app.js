@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.use(express.static("client/build"));
 
@@ -24,5 +24,4 @@ app.get("/getStockData", async (req, res) => {
   await client.end();
   res.send(formattedResults);
 });
-
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
