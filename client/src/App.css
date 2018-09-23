@@ -21,6 +21,8 @@ path {
 #below-svg {
   padding-left: 2%;
   padding-right: 2%;
+  margin: 0 auto;
+  text-align: center;
 }
 
 #svg-container {
@@ -29,31 +31,33 @@ path {
 }
 
 .hb-container {
-    display: inline-block;
-    cursor: pointer;
+  display: inline-block;
+  cursor: pointer;
 }
 
-.bar1, .bar2, .bar3 {
-    width: 25px;
-    height: 3px;
-    background-color: #333;
-    margin: 6px 0;
-    transition: 0.4s;
+.bar1,
+.bar2,
+.bar3 {
+  width: 25px;
+  height: 3px;
+  background-color: #333;
+  margin: 6px 0;
+  transition: 0.4s;
 }
 
 /* Rotate first bar */
 .change .bar1 {
-    transform: rotate(-45deg) translate(-6px, 7px) ;
+  transform: rotate(-45deg) translate(-6px, 7px);
 }
 
 /* Fade out the second bar */
 .change .bar2 {
-    opacity: 0;
+  opacity: 0;
 }
 
 /* Rotate last bar */
 .change .bar3 {
-    transform: rotate(45deg) translate(-6px, -7px) ;
+  transform: rotate(45deg) translate(-6px, -7px);
 }
 
 .lb-border {
@@ -124,12 +128,6 @@ html {
   margin: 0 auto;
 }
 
-#start-buy-sell-container {
-  margin: 0 auto;
-  text-align: center;
-  margin-bottom: 10px;
-}
-
 #start-btn {
   background: rgb(30, 149, 15);
 }
@@ -140,23 +138,7 @@ html {
   margin-left: 20px;
 }
 
-#intro {
-  text-align: center;
-  margin: 0 auto;
-}
-
-.landing {
-  width: 60%;
-  margin: 0 auto;
-  margin-top: 40px;
-  max-width: 800px;
-  border: 1px solid rgb(174, 176, 182);
-  background-color: rgb(205, 206, 210);
-  border-radius: 5px;
-  padding: 15px 30px 15px 30px;
-}
-
-.btn:focus{
+.btn:focus {
   outline: none;
   border: 1px solid black;
   padding: 9px 19px 9px 19px;
@@ -172,17 +154,17 @@ html {
 }
 
 .slider {
-    -webkit-appearance: none;
-    width: 50%;
-    height: 10px;
-    border-radius: 5px;
-    background: #d3d3d3;
-    outline: none;
-    opacity: 0.7;
-    -webkit-transition: .2s;
-    transition: opacity .2s;
-    margin-bottom: 20px;
-    max-width: 400px;
+  -webkit-appearance: none;
+  width: 50%;
+  height: 10px;
+  border-radius: 5px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+  margin-bottom: 20px;
+  max-width: 400px;
 }
 
 .slider:hover {
@@ -190,19 +172,19 @@ html {
 }
 
 .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgb(30, 149, 15);
-    cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgb(30, 149, 15);
+  cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: rgb(30, 149, 15);
-    cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgb(30, 149, 15);
+  cursor: pointer;
 }
