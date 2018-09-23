@@ -10,9 +10,8 @@ from sklearn.linear_model import LinearRegression
 from stocks import stocks
 import psycopg2
 import pprint
+import json
 pp = pprint.PrettyPrinter(indent=4)
-
-conn = psycopg2.connect("dbname=stockit user=" + os.environ['DB_USERNAME'] +' password=' + os.environ['DB_PASSWORD'] + ' host=austintackaberry-stockit.c3tu2houar8w.us-west-1.rds.amazonaws.com')
 
 def getStockData(stockSymbol):
     quandl.ApiConfig.api_key = "qWcicxSctVxrP9PhyneG"
@@ -56,9 +55,47 @@ def getStockData(stockSymbol):
     data = data[['Adj. Close']]
     data = data.rename(columns={'Adj. Close':'EOD'})
     data['prediction'] = prediction[:]
-    data = data.to_json(orient='table')
-    return data
+    # pp.pprint(data)
+    data = data.to_dict(orient='index')
+    returnData = []
+    for key, value in data.items():
+        date = key.date()
+        stringDate = str(date.month) + '/' + str(date.day) + '/' + str(date.year)
+        returnData.append({"date": date, "EOD": value['EOD'], "prediction": value['prediction'], "stringDate":stringDate })
+    returnData = sorted(returnData, key=lambda item: item['date'])
+    for i, elem in enumerate(returnData):
+        returnData[i]['date'] = returnData[i]['stringDate']
+        del returnData[i]['stringDate']
+        
+    return json.dumps(returnData)
 
+def insertStockData(stockList):
+    delete_sql = "DELETE FROM stocks"
+    sql = "INSERT INTO stocks(name, symbol, data) VALUES(%s, %s, %s)"
+
+    try:
+        conn = psycopg2.connect("dbname=stockit user=" + os.environ['DB_USERNAME'] +' password=' + os.environ['DB_PASSWORD'] + ' host=austintackaberry-stockit.c3tu2houar8w.us-west-1.rds.amazonaws.com')
+
+        # create a new cursor
+        cur = conn.cursor()
+        cur.execute(delete_sql)
+        # execute the INSERT statement
+        cur.executemany(sql,stockList)
+        # commit the changes to the database
+        conn.commit()
+        # close communication with the database
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
+
+stockData = []
 for stock in stocks:
-    stockData = getStockData(stock["symbol"])
-    pp.pprint(stockData)
+    stockTuple = stock['name'], stock['symbol'], getStockData(stock["symbol"])
+    stockData.append(stockTuple)
+
+# pp.pprint(stockData)
+# pp.pprint(stockData)
+insertStockData(stockData)
