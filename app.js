@@ -2,9 +2,7 @@ const express = require("express");
 const app = express();
 const port = 5000;
 
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static("client/build"));
-}
+app.use(express.static("client/build"));
 
 app.get("/getStockdata", async (req, res) => {
   const { Client } = require("pg");

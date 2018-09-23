@@ -10,5 +10,8 @@
   "dependencies": {
     "express": "^4.16.3",
     "pg": "^7.4.3"
+  },
+  "scripts": {
+    "server": "node app.js"
   }
 }
