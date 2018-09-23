@@ -2,7 +2,11 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.use(express.static("client/build"));
+console.log(process.env.NODE_ENV);
+
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
 
 app.get("/getStockData", async (req, res) => {
   const { Client } = require("pg");
@@ -24,4 +28,4 @@ app.get("/getStockData", async (req, res) => {
   await client.end();
   res.send(formattedResults);
 });
-app.listen(port, () => console.log(`Server listening on port ${port}!`));
+app.listen(port, () => console.log(`Server listening on port ${port}`));

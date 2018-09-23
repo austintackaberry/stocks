@@ -13,14 +13,14 @@ class Play extends Component {
   constructor() {
     super();
     this.state = {
-      svgJSX: [],
+      svgJSX: null,
       data: [],
       currentData: [],
       currentUserScatterData: [],
       currentUserScatterColor: [],
       currentMLScatterData: [],
       currentMLScatterColor: [],
-      randStock: "",
+      randStock: {},
       gettingNewStock: false,
       userStockJSX: [],
       userStockData: {
@@ -138,8 +138,8 @@ class Play extends Component {
   }
 
   getNewStock() {
-    var data = [];
-    var randStock;
+    var stockData = [];
+    var randStock = {};
     const { userStockData, mlStockData } = this.state;
     async.series([
       callback => {
@@ -150,17 +150,19 @@ class Play extends Component {
             return res.json();
           })
           .then(function(response) {
-            const stockData = JSON.parse(response).data;
-            data = stockData;
+            const { data, symbol, name } = response;
+            randStock.name = name;
+            randStock.symbol = symbol;
+            stockData = data;
             callback();
           });
       },
       callback => {
         userStockData.finalStockValue = parseFloat(
-          data[data.length - 1].EOD * userStockData.currentStocks
+          stockData[stockData.length - 1].EOD * userStockData.currentStocks
         );
         this.setState({
-          data: data,
+          data: stockData,
           randStock: randStock,
           currentData: [],
           currentUserScatterData: [],
@@ -501,25 +503,24 @@ class Play extends Component {
       x: selectScaledX(datum),
       y: selectScaledY(datum)
     }));
-    var [randStockName] = this.state.randStock;
-    var title = [];
+    const { name } = this.state.randStock;
+    var title = null;
     if (currentData.length === data.length) {
-      title.push(
+      title = (
         <text
           x={outerWidth / 2}
           y={margin.top}
           style={{
-            "font-size": "1.2em",
-            "font-weight": "bold",
-            "text-anchor": "middle"
+            fontSize: "1.2em",
+            fontWeight: "bold",
+            textAnchor: "middle"
           }}
         >
-          {randStockName}
+          {name}
         </text>
       );
     }
-    var svgJSX = [];
-    svgJSX.push(
+    var svgJSX = (
       <svg
         className="container"
         height={outerHeight}
@@ -531,7 +532,7 @@ class Play extends Component {
           ref={node => d3.select(node).call(xAxis)}
           style={{
             transform: `translateY(${height + padding.top + margin.top}px)`,
-            "font-size": "1.0em"
+            fontSize: "1.0em"
           }}
         />
         <g
@@ -539,7 +540,7 @@ class Play extends Component {
           ref={node => d3.select(node).call(yAxis)}
           style={{
             transform: `translateX(${padding.left + margin.left}px)`,
-            "font-size": "1.0em"
+            fontSize: "1.0em"
           }}
         />
         <g className="line">
@@ -593,10 +594,15 @@ class Play extends Component {
   }
 
   render() {
-    var { records, userStockData, podium, gettingNewStock } = this.state;
+    var {
+      records,
+      userStockData,
+      podium,
+      gettingNewStock,
+      svgJSX
+    } = this.state;
     var data = this.state.data.slice();
     var currentData = this.state.currentData.slice();
-    var svgJSX = this.state.svgJSX.slice();
     var buys = "buys";
     if (userStockData.currentBuys === 1) {
       buys = "buy";
@@ -605,12 +611,12 @@ class Play extends Component {
     if (userStockData.currentSells === 1) {
       sells = "sell";
     }
-    var startJSX = [];
-    if (svgJSX.length > 0) {
+    var startJSX = null;
+    if (svgJSX) {
       document.getElementById("container").classList.add("content-container");
       document.getElementById("container").classList.remove("landing");
       if (currentData.length !== 0 && currentData.length === data.length) {
-        startJSX.push(
+        startJSX = (
           <div id="start-buy-sell-container">
             <button
               onClick={() => {

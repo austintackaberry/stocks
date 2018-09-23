@@ -12,16 +12,19 @@ class Podium extends Component {
       podiumJSX = (
         <div className="podium">
           <p>
-            <span style={{ "font-weight": "bold" }}>1st</span> {podium[0].name}:
-            ${podium[0].stockValue.toFixed(2)}
+            <span style={{ fontWeight: "bold" }}>1st</span> {podium[0].name}: ${podium[0].stockValue.toFixed(
+              2
+            )}
           </p>
           <p>
-            <span style={{ "font-weight": "bold" }}>2nd</span> {podium[1].name}:
-            ${podium[1].stockValue.toFixed(2)}
+            <span style={{ fontWeight: "bold" }}>2nd</span> {podium[1].name}: ${podium[1].stockValue.toFixed(
+              2
+            )}
           </p>
           <p>
-            <span style={{ "font-weight": "bold" }}>3rd</span> {podium[2].name}:
-            ${podium[2].stockValue.toFixed(2)}
+            <span style={{ fontWeight: "bold" }}>3rd</span> {podium[2].name}: ${podium[2].stockValue.toFixed(
+              2
+            )}
           </p>
         </div>
       );
