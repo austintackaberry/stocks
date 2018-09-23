@@ -1,7 +1,14 @@
-const { Client } = require("pg");
-const client = new Client();
+const express = require("express");
+const app = express();
+const port = 5000;
 
-(async () => {
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static("client/build"));
+}
+
+app.get("/getStockdata", async (req, res) => {
+  const { Client } = require("pg");
+  const client = new Client();
   await client.connect();
 
   const sqlCount = "SELECT COUNT(*) FROM stocks;";
@@ -13,6 +20,8 @@ const client = new Client();
   const resResults = await client.query(sqlQuery);
   const formattedResults = resResults.rows[0];
   formattedResults.data = JSON.parse(formattedResults.data);
-  console.log(formattedResults);
   await client.end();
-})();
+  res.send(formattedResults);
+});
+
+app.listen(port, () => console.log(`Server listening on port ${port}!`));
