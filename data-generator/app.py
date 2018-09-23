@@ -7,11 +7,16 @@ import os
 import numpy as np
 from sklearn import preprocessing, cross_validation, svm
 from sklearn.linear_model import LinearRegression
+from stocks import stocks
+import psycopg2
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
 
-def getStockData():
-    stock = request.args.get('stock', default=None, type=None)
+conn = psycopg2.connect("dbname=stockit user=" + os.environ['DB_USERNAME'] +' password=' + os.environ['DB_PASSWORD'] + ' host=austintackaberry-stockit.c3tu2houar8w.us-west-1.rds.amazonaws.com')
+
+def getStockData(stockSymbol):
     quandl.ApiConfig.api_key = "qWcicxSctVxrP9PhyneG"
-    allData = quandl.get('WIKI/'+stock)
+    allData = quandl.get('WIKI/'+stockSymbol)
     dataLength = 251
     allDataLength = len(allData)
     firstDataElem = math.floor(random.random()*(allDataLength-dataLength))
@@ -52,4 +57,8 @@ def getStockData():
     data = data.rename(columns={'Adj. Close':'EOD'})
     data['prediction'] = prediction[:]
     data = data.to_json(orient='table')
-    return jsonify(data)
+    return data
+
+for stock in stocks:
+    stockData = getStockData(stock["symbol"])
+    pp.pprint(stockData)
