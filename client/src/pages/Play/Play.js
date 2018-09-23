@@ -6,7 +6,6 @@ import Podium from "./components/Podium";
 import Buttons from "./components/Buttons";
 import StockData from "./components/StockData";
 import Slider from "./components/Slider";
-import stocks from "../../stocks";
 import queryString from "query-string";
 var async = require("async");
 
@@ -22,7 +21,6 @@ class Play extends Component {
       currentMLScatterData: [],
       currentMLScatterColor: [],
       randStock: "",
-      stocks,
       gettingNewStock: false,
       userStockJSX: [],
       userStockData: {
@@ -142,13 +140,10 @@ class Play extends Component {
   getNewStock() {
     var data = [];
     var randStock;
-    var stocks = this.state.stocks.slice();
     const { userStockData, mlStockData } = this.state;
     async.series([
       callback => {
-        randStock = stocks[Math.floor(Math.random() * stocks.length)];
-        console.log(randStock);
-        fetch(`/getstockdata/?stock=${randStock[1]}`, {
+        fetch(`/getStockData`, {
           method: "get"
         })
           .then(function(res) {
@@ -473,7 +468,7 @@ class Play extends Component {
     var width = innerWidth - padding.left - padding.right;
     var height = innerHeight - padding.top - padding.bottom;
 
-    var selectX = datum => new Date(datum["Date"]).setHours(0, 0, 0, 0);
+    var selectX = datum => new Date(datum["date"]).setHours(0, 0, 0, 0);
     var selectY = datum => datum.EOD;
     var xScale = d3
       .scaleTime()

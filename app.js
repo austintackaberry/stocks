@@ -4,7 +4,7 @@ const port = 5000;
 
 app.use(express.static("client/build"));
 
-app.get("/getStockdata", async (req, res) => {
+app.get("/getStockData", async (req, res) => {
   const { Client } = require("pg");
   const client = new Client();
   await client.connect();
