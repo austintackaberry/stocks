@@ -15,7 +15,7 @@ class Leaderboard extends Component {
       leaderboardClass = "";
       leaderboardStyle.paddingRight = "20px";
       if (window.innerWidth * 0.02 > 20) {
-        leaderboardStyle["paddingLeft"] = "20px";
+        leaderboardStyle.paddingLeft = "20px";
       }
       let hamburgerClass = "hb-container";
       leaderboardContent = <div />;
