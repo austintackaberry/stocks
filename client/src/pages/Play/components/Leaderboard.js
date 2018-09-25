@@ -63,17 +63,19 @@ class Leaderboard extends Component {
       }
       leaderboardClass = "";
     }
-
-    return (
-      <div
-        id="leaderboard"
-        style={leaderboardStyle}
-        className={leaderboardClass}
-      >
-        {hamburger}
-        {leaderboardContent}
-      </div>
-    );
+    if (leaderboardContent) {
+      return (
+        <div
+          id="leaderboard"
+          style={leaderboardStyle}
+          className={leaderboardClass}
+        >
+          {hamburger}
+          {leaderboardContent}
+        </div>
+      );
+    }
+    return null;
   }
 }
 

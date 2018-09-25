@@ -7,12 +7,6 @@ path {
   stroke: #000;
 }
 
-.content-container {
-  display: table;
-  width: 100%;
-  margin-top: 1.7%;
-}
-
 #leaderboard {
   display: table-cell;
   vertical-align: top;

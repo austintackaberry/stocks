@@ -7,7 +7,7 @@ import Buttons from "./components/Buttons";
 import StockData from "./components/StockData";
 import Slider from "./components/Slider";
 import queryString from "query-string";
-var async = require("async");
+import styled from "react-emotion";
 
 class Play extends Component {
   constructor() {
@@ -20,6 +20,7 @@ class Play extends Component {
       currentUserScatterColor: [],
       currentMLScatterData: [],
       currentMLScatterColor: [],
+      loading: false,
       randStock: {},
       gettingNewStock: false,
       userStockJSX: [],
@@ -137,49 +138,39 @@ class Play extends Component {
     this.setState({ sliderVal: event.target.value });
   }
 
-  getNewStock() {
+  async getNewStock() {
     var stockData = [];
     var randStock = {};
     const { userStockData, mlStockData } = this.state;
-    async.series([
-      callback => {
-        fetch(`/getStockData`, {
-          method: "get"
-        })
-          .then(function(res) {
-            return res.json();
-          })
-          .then(function(response) {
-            const { data, symbol, name } = response;
-            randStock.name = name;
-            randStock.symbol = symbol;
-            stockData = data;
-            callback();
-          });
-      },
-      callback => {
-        userStockData.finalStockValue = parseFloat(
-          stockData[stockData.length - 1].EOD * userStockData.currentStocks
-        );
-        this.setState({
-          data: stockData,
-          randStock: randStock,
-          currentData: [],
-          currentUserScatterData: [],
-          currentUserScatterColor: [],
-          currentMLScatterData: [],
-          currentMLScatterColor: [],
-          gettingNewStock: false,
-          userStockData: userStockData,
-          mlStockData: mlStockData
-        });
-        this.plotTimer();
-        callback();
-      }
-    ]);
+    const fetchRes = await fetch(`/getStockData`, {
+      method: "get"
+    });
+    const response = await fetchRes.json();
+    const { data, symbol, name } = response;
+    randStock.name = name;
+    randStock.symbol = symbol;
+    stockData = data;
+    userStockData.finalStockValue = parseFloat(
+      stockData[stockData.length - 1].EOD * userStockData.currentStocks
+    );
+    this.setState({
+      data: stockData,
+      randStock: randStock,
+      currentData: [],
+      currentUserScatterData: [],
+      currentUserScatterColor: [],
+      currentMLScatterData: [],
+      currentMLScatterColor: [],
+      gettingNewStock: false,
+      userStockData: userStockData,
+      mlStockData: mlStockData
+    });
+    this.plotTimer();
+    return;
   }
 
-  handleStart() {
+  async handleStart() {
+    this.setState({ loading: true });
     var currentData = this.state.currentData.slice();
     var data = this.state.data.slice();
     var { userStockData, mlStockData } = this.state;
@@ -197,7 +188,7 @@ class Play extends Component {
         userStockData: userStockData,
         mlStockData: mlStockData
       });
-      this.getNewStock();
+      await this.getNewStock();
     }
   }
 
@@ -430,7 +421,6 @@ class Play extends Component {
     currentMLScatterColor
   ) {
     var margin;
-    var outerWidth;
     var svgStyle = {};
     margin = {
       top: window.innerHeight / 20.0,
@@ -450,8 +440,9 @@ class Play extends Component {
     if (margin.right > 10) {
       margin.right = 10;
     }
-    outerWidth =
-      window.innerWidth - document.getElementById("leaderboard").offsetWidth;
+    const svgWidth = document.getElementById("svg-container")
+      ? document.getElementById("svg-container").offsetWidth
+      : window.innerWidth * 0.98;
     var padding = {
       top: window.innerHeight / 39.0,
       right: window.innerWidth / 35.0,
@@ -462,10 +453,10 @@ class Play extends Component {
       padding.right = 15;
     }
     var outerHeight = window.innerHeight * 0.7;
-    if (outerHeight > 1.5 * outerWidth) {
-      outerHeight = 1.5 * outerWidth;
+    if (outerHeight > 1.5 * svgWidth) {
+      outerHeight = 1.5 * svgWidth;
     }
-    var innerWidth = outerWidth - margin.left - margin.right;
+    var innerWidth = svgWidth - margin.left - margin.right;
     var innerHeight = outerHeight - margin.top - margin.bottom;
     var width = innerWidth - padding.left - padding.right;
     var height = innerHeight - padding.top - padding.bottom;
@@ -508,7 +499,7 @@ class Play extends Component {
     if (currentData.length === data.length) {
       title = (
         <text
-          x={outerWidth / 2}
+          x={svgWidth / 2}
           y={margin.top}
           style={{
             fontSize: "1.2em",
@@ -521,55 +512,57 @@ class Play extends Component {
       );
     }
     var svgJSX = (
-      <svg
-        className="container"
-        height={outerHeight}
-        width={outerWidth}
-        style={svgStyle}
-      >
-        <g
-          className="xAxis"
-          ref={node => d3.select(node).call(xAxis)}
-          style={{
-            transform: `translateY(${height + padding.top + margin.top}px)`,
-            fontSize: "1.0em"
-          }}
-        />
-        <g
-          className="yAxis"
-          ref={node => d3.select(node).call(yAxis)}
-          style={{
-            transform: `translateX(${padding.left + margin.left}px)`,
-            fontSize: "1.0em"
-          }}
-        />
-        <g className="line">
-          <path d={linePath} />
-        </g>
-        <g className="scatter">
-          {userCirclePoints.map((circlePoint, index) => (
-            <circle
-              cx={circlePoint.x}
-              cy={circlePoint.y}
-              key={`${circlePoint.x},${circlePoint.y}`}
-              r={6}
-              style={{ fill: currentUserScatterColor[index] }}
-            />
-          ))}
-        </g>
-        <g className="scatter">
-          {mlCirclePoints.map((circlePoint, index) => (
-            <circle
-              cx={circlePoint.x}
-              cy={circlePoint.y}
-              key={`${circlePoint.x},${circlePoint.y}`}
-              r={6}
-              style={{ fill: currentMLScatterColor[index] }}
-            />
-          ))}
-        </g>
-        {title}
-      </svg>
+      <SvgContainer id="svg-container">
+        <svg
+          className="container"
+          height={outerHeight}
+          width="100%"
+          style={svgStyle}
+        >
+          <g
+            className="xAxis"
+            ref={node => d3.select(node).call(xAxis)}
+            style={{
+              transform: `translateY(${height + padding.top + margin.top}px)`,
+              fontSize: "1.0em"
+            }}
+          />
+          <g
+            className="yAxis"
+            ref={node => d3.select(node).call(yAxis)}
+            style={{
+              transform: `translateX(${padding.left + margin.left}px)`,
+              fontSize: "1.0em"
+            }}
+          />
+          <g className="line">
+            <path d={linePath} />
+          </g>
+          <g className="scatter">
+            {userCirclePoints.map((circlePoint, index) => (
+              <circle
+                cx={circlePoint.x}
+                cy={circlePoint.y}
+                key={`${circlePoint.x},${circlePoint.y}`}
+                r={6}
+                style={{ fill: currentUserScatterColor[index] }}
+              />
+            ))}
+          </g>
+          <g className="scatter">
+            {mlCirclePoints.map((circlePoint, index) => (
+              <circle
+                cx={circlePoint.x}
+                cy={circlePoint.y}
+                key={`${circlePoint.x},${circlePoint.y}`}
+                r={6}
+                style={{ fill: currentMLScatterColor[index] }}
+              />
+            ))}
+          </g>
+          {title}
+        </svg>
+      </SvgContainer>
     );
     this.setState({
       svgJSX: svgJSX,
@@ -599,7 +592,8 @@ class Play extends Component {
       userStockData,
       podium,
       gettingNewStock,
-      svgJSX
+      svgJSX,
+      loading
     } = this.state;
     var data = this.state.data.slice();
     var currentData = this.state.currentData.slice();
@@ -613,8 +607,9 @@ class Play extends Component {
     }
     var startJSX = null;
     if (svgJSX) {
-      document.getElementById("container").classList.add("content-container");
-      document.getElementById("container").classList.remove("landing");
+      if (loading) {
+        this.setState({ loading: false });
+      }
       if (currentData.length !== 0 && currentData.length === data.length) {
         startJSX = (
           <div id="start-buy-sell-container">
@@ -633,42 +628,18 @@ class Play extends Component {
     } else {
       // Start page
     }
+    const svgPlaceholder = (
+      <SvgPlaceholder
+        height={window.innerHeight * 0.7}
+        onClick={this.handleStart}
+      >
+        <StartText>Start</StartText>
+      </SvgPlaceholder>
+    );
     return (
-      <div>
-        <div id="container" className="landing">
-          <div id="svg-container">
-            {svgJSX}
-            <div id="below-svg">
-              <div id="start-buy-sell-container">
-                <Slider
-                  sliderVal={this.state.sliderVal}
-                  handleSlider={event => this.handleSlider(event)}
-                  showStartScreen={this.state.showStartScreen}
-                />
-                {startJSX}
-                <Buttons
-                  svgJSX={svgJSX}
-                  currentData={currentData}
-                  data={data}
-                  handleBuy={() => this.handleBuy()}
-                  handleSell={() => this.handleSell()}
-                  userStockData={userStockData}
-                />
-              </div>
-              <StockData
-                svgJSX={svgJSX}
-                userStockData={userStockData}
-                buys={buys}
-                sells={sells}
-              />
-              <Podium
-                currentData={currentData}
-                data={data}
-                gettingNewStock={gettingNewStock}
-                podium={podium}
-              />
-            </div>
-          </div>
+      <Container>
+        <MainContent>
+          <GraphContent>{svgJSX || (!loading && svgPlaceholder)}</GraphContent>
           <Leaderboard
             leaderboardIsHidden={this.state.leaderboardIsHidden}
             handleLeaderboardClick={() => this.handleLeaderboardClick()}
@@ -676,10 +647,80 @@ class Play extends Component {
             data={data}
             currentData={currentData}
           />
+        </MainContent>
+        <div id="below-svg">
+          <div id="start-buy-sell-container">
+            <Slider
+              sliderVal={this.state.sliderVal}
+              handleSlider={event => this.handleSlider(event)}
+              showStartScreen={this.state.showStartScreen}
+            />
+            {startJSX}
+            <Buttons
+              svgJSX={svgJSX}
+              currentData={currentData}
+              data={data}
+              handleBuy={() => this.handleBuy()}
+              handleSell={() => this.handleSell()}
+              userStockData={userStockData}
+            />
+          </div>
+          <StockData
+            svgJSX={svgJSX}
+            userStockData={userStockData}
+            buys={buys}
+            sells={sells}
+          />
+          <Podium
+            currentData={currentData}
+            data={data}
+            gettingNewStock={gettingNewStock}
+            podium={podium}
+          />
         </div>
-      </div>
+      </Container>
     );
   }
 }
 
 export default Play;
+
+const SvgPlaceholder = styled("button")(({ height }) => {
+  return {
+    width: "100%",
+    backgroundColor: "gray",
+    height,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer"
+  };
+});
+
+const Container = styled("div")`
+  padding: 15px;
+`;
+
+const StartText = styled("p")`
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+`;
+
+const SvgContainer = styled("div")`
+  display: table;
+  width: 100%;
+  margintop: 1.7%;
+  flex: 1 1 400px;
+`;
+
+const MainContent = styled("div")`
+  display: flex;
+  flex-direction: row;
+`;
+
+const GraphContent = styled("div")`
+  flex-grow: 1;
+`;
