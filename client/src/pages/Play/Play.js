@@ -12,6 +12,13 @@ import styled from "react-emotion";
 class Play extends Component {
   constructor() {
     super();
+
+    this.intialStockData = {
+      currentStocks: 3,
+      currentBuys: 3,
+      currentSells: 3
+    };
+
     this.state = {
       svgJSX: null,
       data: [],
@@ -25,21 +32,11 @@ class Play extends Component {
       gettingNewStock: false,
       userStockJSX: [],
       userStockData: {
-        currentStocks: 3,
-        currentBuys: 3,
-        currentSells: 3,
-        initialStocks: 3,
-        initialBuys: 3,
-        initialSells: 3,
+        ...this.initialStockData,
         bank: 0
       },
       mlStockData: {
-        currentStocks: 3,
-        currentBuys: 3,
-        currentSells: 3,
-        initialStocks: 3,
-        initialBuys: 3,
-        initialSells: 3,
+        ...this.initialStockData,
         bank: 0
       },
       userBought: false,
@@ -173,20 +170,11 @@ class Play extends Component {
     this.setState({ loading: true });
     var currentData = this.state.currentData.slice();
     var data = this.state.data.slice();
-    var { userStockData, mlStockData } = this.state;
     if (currentData.length === data.length) {
-      userStockData.currentStocks = userStockData.initialStocks;
-      userStockData.currentBuys = userStockData.initialBuys;
-      userStockData.currentSells = userStockData.initialSells;
-      userStockData.bank = 0;
-      mlStockData.currentStocks = mlStockData.initialStocks;
-      mlStockData.currentBuys = mlStockData.initialBuys;
-      mlStockData.currentSells = mlStockData.initialSells;
-      mlStockData.bank = 0;
       this.setState({
         gettingNewStock: true,
-        userStockData: userStockData,
-        mlStockData: mlStockData
+        userStockData: { ...this.initialStockData, bank: 0 },
+        mlStockData: { ...this.initialStockData, bank: 0 }
       });
       await this.getNewStock();
     }
