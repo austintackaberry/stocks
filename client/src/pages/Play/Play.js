@@ -13,11 +13,13 @@ class Play extends Component {
   constructor() {
     super();
 
-    this.intialStockData = {
+    const initialStockData = {
       currentStocks: 3,
       currentBuys: 3,
       currentSells: 3
     };
+
+    this.initialStockData = { ...initialStockData };
 
     this.state = {
       svgJSX: null,
@@ -32,11 +34,11 @@ class Play extends Component {
       gettingNewStock: false,
       userStockJSX: [],
       userStockData: {
-        ...this.initialStockData,
+        ...initialStockData,
         bank: 0
       },
       mlStockData: {
-        ...this.initialStockData,
+        ...initialStockData,
         bank: 0
       },
       userBought: false,
@@ -135,10 +137,9 @@ class Play extends Component {
     this.setState({ sliderVal: event.target.value });
   }
 
-  async getNewStock() {
+  async getNewStock({ userStockData, mlStockData }) {
     var stockData = [];
     var randStock = {};
-    const { userStockData, mlStockData } = this.state;
     const fetchRes = await fetch(`/getStockData`, {
       method: "get"
     });
@@ -147,9 +148,6 @@ class Play extends Component {
     randStock.name = name;
     randStock.symbol = symbol;
     stockData = data;
-    userStockData.finalStockValue = parseFloat(
-      stockData[stockData.length - 1].EOD * userStockData.currentStocks
-    );
     this.setState({
       data: stockData,
       randStock: randStock,
@@ -159,8 +157,13 @@ class Play extends Component {
       currentMLScatterData: [],
       currentMLScatterColor: [],
       gettingNewStock: false,
-      userStockData: userStockData,
-      mlStockData: mlStockData
+      userStockData: {
+        ...userStockData,
+        finalStockValue: parseFloat(
+          stockData[stockData.length - 1].EOD * userStockData.currentStocks
+        )
+      },
+      mlStockData
     });
     this.plotTimer();
     return;
@@ -170,23 +173,21 @@ class Play extends Component {
     this.setState({ loading: true });
     var currentData = this.state.currentData.slice();
     var data = this.state.data.slice();
+    const newStockData = {
+      userStockData: { ...this.initialStockData, bank: 0 },
+      mlStockData: { ...this.initialStockData, bank: 0 }
+    };
     if (currentData.length === data.length) {
-      this.setState({
-        gettingNewStock: true,
-        userStockData: { ...this.initialStockData, bank: 0 },
-        mlStockData: { ...this.initialStockData, bank: 0 }
-      });
-      await this.getNewStock();
+      await this.getNewStock(newStockData);
     }
   }
 
   handleBuySell = event => {
-    var { userStockData } = this.state;
-    if (event.key == "ArrowDown" && userStockData.currentSells > 0) {
-      this.setState({ userSold: true });
+    if (event.key == "ArrowDown") {
+      this.handleSell();
     }
-    if (event.key == "ArrowUp" && userStockData.currentBuys > 0) {
-      this.setState({ userBought: true });
+    if (event.key == "ArrowUp") {
+      this.handleBuy();
     }
   };
   handleBuy = event => {
