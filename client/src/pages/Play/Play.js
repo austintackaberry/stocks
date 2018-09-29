@@ -585,14 +585,8 @@ class Play extends Component {
     } = this.state;
     var data = this.state.data.slice();
     var currentData = this.state.currentData.slice();
-    var buys = "buys";
-    if (userStockData.currentBuys === 1) {
-      buys = "buy";
-    }
-    var sells = "sells";
-    if (userStockData.currentSells === 1) {
-      sells = "sell";
-    }
+    var buys = userStockData.currentBuys === 1 ? "buy" : "buys";
+    var sells = userStockData.currentSells === 1 ? "sell" : "sells";
     var startJSX = null;
     if (svgJSX) {
       if (loading) {
@@ -613,8 +607,6 @@ class Play extends Component {
           </div>
         );
       }
-    } else {
-      // Start page
     }
     const svgPlaceholder = (
       <SvgPlaceholder
