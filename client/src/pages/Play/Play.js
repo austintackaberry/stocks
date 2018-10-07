@@ -196,17 +196,17 @@ class Play extends Component {
     }
   };
   handleBuy = event => {
-    userBought();
     var { userStockData } = this.state;
     if (userStockData.currentBuys > 0) {
       this.setState({ userBought: true });
+      userBought();
     }
   };
   handleSell = event => {
-    userSold();
     var { userStockData } = this.state;
     if (userStockData.currentSells > 0) {
       this.setState({ userSold: true });
+      userSold();
     }
   };
 
