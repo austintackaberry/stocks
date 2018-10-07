@@ -5,6 +5,14 @@ const port = process.env.PORT || 5000;
 
 console.log(process.env.NODE_ENV);
 app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "https://www.googletagmanager.com"]
+    }
+  })
+);
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("client/build"));
