@@ -9,7 +9,8 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://www.google-analytics.com/analytics.js"]
+      scriptSrc: ["'self'", "https://www.google-analytics.com/analytics.js"],
+      imgSrc: ["'self'", "https://www.google-analytics.com"]
     }
   })
 );
