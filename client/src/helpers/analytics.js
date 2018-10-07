@@ -1,20 +1,20 @@
 import ReactGA from "react-ga";
 
-export const userInitiatedStart = () => {
+export const gameStarted = num => {
   ReactGA.event({
     category: "User",
-    action: "User initiated game start"
+    action: `started ${num}`
   });
 };
 export const userBought = () => {
   ReactGA.event({
     category: "User",
-    action: "User bought stock"
+    action: "bought"
   });
 };
 export const userSold = () => {
   ReactGA.event({
     category: "User",
-    action: "User sold stock"
+    action: "sold"
   });
 };

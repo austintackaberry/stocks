@@ -4,7 +4,7 @@ import Home from "./pages/Home/Home";
 import Play from "./pages/Play/Play";
 import createBrowserHistory from "history/createBrowserHistory";
 import ReactGA from "react-ga";
-ReactGA.initialize("UA-112850376-2", { titleCase: false });
+ReactGA.initialize("UA-112850376-2", { titleCase: false, debug: true });
 
 const history = createBrowserHistory();
 ReactGA.pageview(window.location.pathname + window.location.search);

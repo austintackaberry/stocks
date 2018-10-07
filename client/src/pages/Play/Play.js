@@ -8,11 +8,7 @@ import StockData from "./components/StockData";
 import Slider from "./components/Slider";
 import queryString from "query-string";
 import styled from "react-emotion";
-import {
-  userInitiatedStart,
-  userBought,
-  userSold
-} from "../../helpers/analytics";
+import { userBought, userSold, gameStarted } from "../../helpers/analytics";
 
 class Play extends Component {
   constructor() {
@@ -83,7 +79,8 @@ class Play extends Component {
       resizing: false,
       leaderboardIsHidden: false,
       sliderVal: 50,
-      showStartScreen: true
+      showStartScreen: true,
+      numGamesStarted: 0
     };
     this.plotGraph = this.plotGraph.bind(this);
     this.plotTimer = this.plotTimer.bind(this);
@@ -184,6 +181,8 @@ class Play extends Component {
     };
     if (currentData.length === data.length) {
       await this.getNewStock(newStockData);
+      gameStarted(this.state.numGamesStarted + 1);
+      this.setState({ numGamesStarted: this.state.numGamesStarted + 1 });
     }
   }
 
@@ -604,10 +603,7 @@ class Play extends Component {
         startJSX = (
           <div id="start-buy-sell-container">
             <button
-              onClick={e => {
-                userInitiatedStart();
-                this.handleStart(e);
-              }}
+              onClick={e => this.handleStart(e)}
               id="start-btn"
               className="btn btn-active"
             >
@@ -620,10 +616,7 @@ class Play extends Component {
     const svgPlaceholder = (
       <SvgPlaceholder
         height={window.innerHeight * 0.7}
-        onClick={e => {
-          userInitiatedStart();
-          this.handleStart(e);
-        }}
+        onClick={e => this.handleStart(e)}
       >
         <StartText>Start</StartText>
       </SvgPlaceholder>

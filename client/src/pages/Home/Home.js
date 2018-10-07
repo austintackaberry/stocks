@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
 import styled from "react-emotion";
-import { userInitiatedStart } from "../../helpers/analytics";
 
 const Intro = styled("div")`
   text-align: center;
@@ -50,7 +49,7 @@ class Home extends Component {
           <br />
         </Intro>
         <PlayContainer>
-          <PlayLink to="/play?autoStart=true" onClick={userInitiatedStart}>
+          <PlayLink to="/play?autoStart=true">
             <div id="start-btn" className="btn btn-active">
               Start
             </div>
