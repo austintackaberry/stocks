@@ -8,6 +8,11 @@ import StockData from "./components/StockData";
 import Slider from "./components/Slider";
 import queryString from "query-string";
 import styled from "react-emotion";
+import {
+  userInitiatedStart,
+  userBought,
+  userSold
+} from "../../helpers/analytics";
 
 class Play extends Component {
   constructor() {
@@ -191,12 +196,14 @@ class Play extends Component {
     }
   };
   handleBuy = event => {
+    userBought();
     var { userStockData } = this.state;
     if (userStockData.currentBuys > 0) {
       this.setState({ userBought: true });
     }
   };
   handleSell = event => {
+    userSold();
     var { userStockData } = this.state;
     if (userStockData.currentSells > 0) {
       this.setState({ userSold: true });
@@ -597,8 +604,9 @@ class Play extends Component {
         startJSX = (
           <div id="start-buy-sell-container">
             <button
-              onClick={() => {
-                this.handleStart();
+              onClick={e => {
+                userInitiatedStart();
+                this.handleStart(e);
               }}
               id="start-btn"
               className="btn btn-active"
@@ -612,7 +620,10 @@ class Play extends Component {
     const svgPlaceholder = (
       <SvgPlaceholder
         height={window.innerHeight * 0.7}
-        onClick={this.handleStart}
+        onClick={e => {
+          userInitiatedStart();
+          this.handleStart(e);
+        }}
       >
         <StartText>Start</StartText>
       </SvgPlaceholder>
