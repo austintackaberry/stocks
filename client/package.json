@@ -30,7 +30,7 @@
     "query-string": "^5.1.1",
     "raf": "3.4.0",
     "react": "^16.5.2",
-    "react-dev-utils": "^4.2.1",
+    "react-dev-utils": "^5.0.2",
     "react-dom": "^16.4.0",
     "react-emotion": "^9.2.10",
     "react-router-dom": "^4.3.1",
