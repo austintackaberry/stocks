@@ -1,8 +1,10 @@
 const express = require("express");
+const helmet = require("helmet");
 const app = express();
 const port = process.env.PORT || 5000;
 
 console.log(process.env.NODE_ENV);
+app.use(helmet());
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static("client/build"));
