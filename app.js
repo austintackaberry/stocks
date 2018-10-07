@@ -9,7 +9,7 @@ app.use(
   helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://www.googletagmanager.com"]
+      scriptSrc: ["'self'", "https://www.google-analytics.com/analytics.js"]
     }
   })
 );
