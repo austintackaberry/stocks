@@ -4,6 +4,8 @@ import Home from "./pages/Home/Home";
 import Play from "./pages/Play/Play";
 import createBrowserHistory from "history/createBrowserHistory";
 import ReactGA from "react-ga";
+import { sheet } from "emotion";
+sheet.tags[0] = document.getElementById("MyEmotionSheet");
 ReactGA.initialize("UA-112850376-2", { titleCase: false });
 
 const history = createBrowserHistory();
