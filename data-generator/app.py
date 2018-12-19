@@ -10,15 +10,15 @@ from sklearn.linear_model import LinearRegression
 import psycopg2
 import json
 
-def getStockData(stockSymbol):
+def get_stock_data(stockSymbol):
     quandl.ApiConfig.api_key = "qWcicxSctVxrP9PhyneG"
     allData = quandl.get('WIKI/'+stockSymbol)
     dataLength = 251
-    allDataLength = len(allData)
-    firstDataElem = math.floor(random.random()*(allDataLength-dataLength))
-    mlData = allData[0:firstDataElem+dataLength]
+    all_data_length = len(allData)
+    first_data_elem = math.floor(random.random()*(all_data_length-dataLength))
+    mlData = allData[0:first_data_elem+dataLength]
 
-    def FormatForModel(dataArray):
+    def format_for_model(dataArray):
         dataArray = dataArray[['Adj. Open', 'Adj. High', 'Adj. Low', 'Adj. Close', 'Adj. Volume']]
         dataArray['HL_PCT'] = (dataArray['Adj. High'] - dataArray['Adj. Close']) / dataArray['Adj. Close'] * 100.0
         dataArray['PCT_change'] = (dataArray['Adj. Close'] - dataArray['Adj. Open']) / dataArray['Adj. Open'] * 100.0
@@ -26,7 +26,7 @@ def getStockData(stockSymbol):
         dataArray.fillna(-99999, inplace=True)
         return dataArray
 
-    mlData = FormatForModel(mlData)
+    mlData = format_for_model(mlData)
 
     forecast_col = 'Adj. Close'
     forecast_out = int(math.ceil(0.12*dataLength))
@@ -55,26 +55,26 @@ def getStockData(stockSymbol):
 
     # Convert dataframe to dictionary
     data = data.to_dict(orient='index')
-    returnData = []
+    return_data = []
 
     # Format data
     for key, value in data.items():
         date = key.date()
         stringDate = str(date.month) + '/' + str(date.day) + '/' + str(date.year)
-        returnData.append({"date": date, "EOD": value['EOD'], "prediction": value['prediction'], "stringDate":stringDate })
+        return_data.append({"date": date, "EOD": value['EOD'], "prediction": value['prediction'], "stringDate":stringDate })
     
     # Sort data by date
-    returnData = sorted(returnData, key=lambda item: item['date'])
+    return_data = sorted(return_data, key=lambda item: item['date'])
 
     # Format data
-    for i, elem in enumerate(returnData):
-        returnData[i]['date'] = returnData[i]['stringDate']
-        del returnData[i]['stringDate']
+    for i, elem in enumerate(return_data):
+        return_data[i]['date'] = return_data[i]['stringDate']
+        del return_data[i]['stringDate']
         
     # Convert to json and stringify
-    return json.dumps(returnData)
+    return json.dumps(return_data)
 
-def insertStockData(stockList):
+def insert_stock_data(stockList):
     sql = "UPDATE stocks set data=%s where id=%s"
 
     try:
@@ -94,7 +94,7 @@ def insertStockData(stockList):
         if conn is not None:
             conn.close()
 
-def getSqlStockData():
+def get_sql_stock_data():
     sql = "SELECT name, symbol, id from stocks"
 
     try:
@@ -114,14 +114,14 @@ def getSqlStockData():
         if conn is not None:
             conn.close()
 
-stocks = getSqlStockData()
+stocks = get_sql_stock_data()
 stockData = []
 for stock in stocks:
     name = stock[0]
     symbol = stock[1]
     id = stock[2]
-    data = getStockData(symbol)
+    data = get_stock_data(symbol)
     stockTuple = data, id
     stockData.append(stockTuple)
 
-insertStockData(stockData)
+insert_stock_data(stockData)
