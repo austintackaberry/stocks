@@ -5,6 +5,8 @@ const fs = require("fs");
 var uuidv4 = require("uuid/v4");
 const app = express();
 const port = process.env.PORT || 5000;
+const AWS = require("aws-sdk");
+require("dotenv").config();
 
 console.log(process.env.NODE_ENV);
 app.use(helmet());
@@ -41,24 +43,29 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.get("/getStockData", async (req, res) => {
-  const { Client } = require("pg");
-  const client = new Client();
-  await client.connect();
+  AWS.config.update({
+    region: "us-west-1"
+  });
+  const dynamodb = new AWS.DynamoDB.DocumentClient({
+    apiVersion: "2012-08-10",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: "us-west-1"
+  });
 
-  // Get random stock id
-  const sqlCount = "SELECT COUNT(*) FROM stocks;";
-  const resCount = await client.query(sqlCount);
-  const count = parseInt(resCount.rows[0].count);
-  const randId = Math.floor(Math.random() * count);
-
-  // Get data of random stock
-  const sqlQuery = "SELECT * FROM stocks WHERE id = " + randId;
-  const resResults = await client.query(sqlQuery);
-  const formattedResults = resResults.rows[0];
-  formattedResults.data = JSON.parse(formattedResults.data);
-
-  await client.end();
-  res.send(formattedResults);
+  const params = {
+    TableName: "stockit"
+  };
+  dynamodb.scan(params, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      const count = data.Count;
+      const randId = Math.floor(Math.random() * count);
+      const item = data.Items[randId];
+      res.send(item);
+    }
+  });
 });
 app.listen(port, () => console.log(`Server listening on port ${port}`));
 

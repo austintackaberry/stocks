@@ -17,9 +17,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-dynamodb_session = Session(aws_access_key_id=os.getenv('AWS_ACCESS_ID'),
+dynamodb_session = Session(aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
                            aws_secret_access_key=os.getenv(
-                               'AWS_ACCESS_SECRET'),
+                               'AWS_SECRET_ACCESS_KEY'),
                            region_name='us-west-1')
 
 dynamodb = dynamodb_session.resource('dynamodb')

@@ -30,4 +30,3 @@ Werkzeug==0.14
 awscli
 boto3
 python-dotenv
-psycopg2
