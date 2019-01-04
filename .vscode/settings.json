@@ -1,3 +1,4 @@
 {
-    "python.pythonPath": "${workspaceFolder}/venv/bin/python"
+  "python.pythonPath": "/home/austintackaberry/dev/stocks/data-generator/venv/bin/python",
+  "python.venvPath": "/home/austintackaberry/dev/stocks/data-generator/venv"
 }
