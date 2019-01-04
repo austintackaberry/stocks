@@ -20,6 +20,7 @@
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "nodemon app.js"
+    "server": "nodemon app.js",
+    "heroku": "node app.js"
   }
 }
