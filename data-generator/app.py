@@ -12,7 +12,6 @@ import os
 import numpy as np
 from sklearn import preprocessing, cross_validation, svm
 from sklearn.linear_model import LinearRegression
-import psycopg2
 import json
 from dotenv import load_dotenv
 load_dotenv()
@@ -94,66 +93,30 @@ def get_stock_data(stockSymbol):
         return_data[i]['date'] = return_data[i]['stringDate']
         del return_data[i]['stringDate']
 
-    # Convert to json and stringify
-    # return json.dumps(return_data)
     return return_data
 
 
 def insert_stock_data(stockList):
-    # sql = "UPDATE stocks set data=%s where id=%s"
     table = dynamodb.Table('stockit')
-    # try:
-    # conn = psycopg2.connect(
-    #     "dbname=stockit user=" + os.environ['PGUSER'] + ' password=' + os.environ['PGPASSWORD'] + ' host=' + os.environ['PGHOST'])
-
-    # # create a new cursor
-    # cur = conn.cursor()
-    # # execute the INSERT statement
-    # cur.executemany(sql, stockList)
-    # # commit the changes to the database
-    # conn.commit()
-    # # close communication with the database
-    # cur.close()
     with table.batch_writer() as batch:
         for i in range(1, len(stockList)):
             batch.put_item(
                 Item=stockList[i]
             )
-    # except (Exception, psycopg2.DatabaseError) as error:
-    #     print(error)
-    # finally:
-    #     if conn is not None:
-    #         conn.close()
 
 
-def get_sql_stock_data():
-    sql = "SELECT name, symbol, id from stocks"
-
-    conn = psycopg2.connect(
-        "dbname=stockit user=" + os.environ['PGUSER'] + ' password=' + os.environ['PGPASSWORD'] + ' host=' + os.environ['PGHOST'])
-    try:
-
-        # create a new cursor
-        cur = conn.cursor()
-        # execute the INSERT statement
-        cur.execute(sql)
-        data = cur.fetchall()
-        # close communication with the database
-        cur.close()
-        return data
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
+def get_stock_data_from_db():
+    table = dynamodb.Table('stockit')
+    data = table.scan()
+    return data['Items']
 
 
-stocks = get_sql_stock_data()
+stocks = get_stock_data_from_db()
 stockData = []
 for stock in stocks:
-    name = stock[0]
-    symbol = stock[1]
-    id = stock[2]
+    name = stock['name']
+    symbol = stock['symbol']
+    id = stock['id']
     data = get_stock_data(symbol)
     stockEl = {"data": data, "id": id, "name": name, "symbol": symbol}
     stockData.append(stockEl)
