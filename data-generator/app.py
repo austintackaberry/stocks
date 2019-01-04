@@ -115,7 +115,7 @@ def insert_stock_data(stockList):
     # # close communication with the database
     # cur.close()
     with table.batch_writer() as batch:
-        for i in range(1):
+        for i in range(1, len(stockList)):
             batch.put_item(
                 Item=stockList[i]
             )
