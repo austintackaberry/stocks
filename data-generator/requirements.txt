@@ -27,3 +27,6 @@ six==1.11.0
 sklearn==0.0
 urllib3==1.21.1
 Werkzeug==0.14
+awscli
+boto3
+python-dotenv

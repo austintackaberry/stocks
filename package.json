@@ -8,11 +8,12 @@
     }
   },
   "dependencies": {
+    "aws-sdk": "^2.383.0",
     "concurrently": "^4.0.1",
+    "dotenv": "^6.2.0",
     "express": "^4.16.3",
     "helmet": "^3.13.0",
     "nodemon": "^1.18.4",
-    "pg": "^7.4.3",
     "uuid": "^3.3.2"
   },
   "scripts": {
