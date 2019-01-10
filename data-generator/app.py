@@ -14,6 +14,8 @@ from sklearn import preprocessing, cross_validation, svm
 from sklearn.linear_model import LinearRegression
 import json
 from dotenv import load_dotenv
+
+# load env vars
 load_dotenv()
 
 
@@ -26,7 +28,8 @@ dynamodb = dynamodb_session.resource('dynamodb')
 
 
 def get_stock_data(stockSymbol):
-    quandl.ApiConfig.api_key = "qWcicxSctVxrP9PhyneG"
+    quandl.ApiConfig.api_key = os.getenv(
+        'QUANDL_API_KEY')
     allData = quandl.get('WIKI/'+stockSymbol)
     dataLength = 251
     all_data_length = len(allData)
@@ -66,7 +69,6 @@ def get_stock_data(stockSymbol):
 
     clf = LinearRegression()
     clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
 
     prediction = clf.predict(X_data)
     data = data[['Adj. Close']]
