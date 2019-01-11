@@ -31,7 +31,10 @@ def get_stock_data(stockSymbol):
     quandl.ApiConfig.api_key = os.getenv(
         'QUANDL_API_KEY')
     allData = quandl.get('WIKI/'+stockSymbol)
+
+    # Approximate number of trading days in a year
     dataLength = 251
+
     all_data_length = len(allData)
     first_data_elem = math.floor(random.random()*(all_data_length-dataLength))
     mlData = allData[0:first_data_elem+dataLength]
