@@ -8,12 +8,13 @@ const port = process.env.PORT || 5000;
 const AWS = require("aws-sdk");
 require("dotenv").config();
 
-console.log(process.env.NODE_ENV);
 app.use(helmet());
+
 app.use(function(req, res, next) {
   res.locals.nonce = uuidv4();
   next();
 });
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -30,6 +31,7 @@ app.use(
   })
 );
 
+// Only serve up static build files in production
 if (process.env.NODE_ENV === "production") {
   app.get("/", async function(req, res) {
     const pagePath = path.join(__dirname + "/client/build/index.html");
@@ -56,6 +58,8 @@ app.get("/getStockData", async (req, res) => {
   const params = {
     TableName: "stockit"
   };
+
+  // Get all documents from db and randomly choose one
   dynamodb.scan(params, (err, data) => {
     if (err) {
       console.log(err);
