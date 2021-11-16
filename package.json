@@ -9,7 +9,7 @@
     }
   },
   "dependencies": {
-    "aws-sdk": "^2.383.0",
+    "aws-sdk": "^2.814.0",
     "concurrently": "^4.0.1",
     "dotenv": "^6.2.0",
     "express": "^4.16.3",
